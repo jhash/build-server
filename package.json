@@ -1,8 +1,8 @@
 {
-  "name": "koa2-boilerplate",
-  "version": "1.0.0",
-  "description": "Minimal koa v2 boilerplate.",
-  "main": "index.js",
+  "name": "build-server",
+  "version": "0.0.1",
+  "description": "Minimal server for storing dynamic data.",
+  "main": "app.js",
   "scripts": {
     "test": "make test",
     "start": "./node_modules/.bin/nodemon"

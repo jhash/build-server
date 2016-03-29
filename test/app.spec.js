@@ -3,12 +3,11 @@ import supertest from 'supertest'
 
 const request = supertest.agent(app.listen())
 
-describe('Hello World', function () {
-  it('should say "Hello World"', function (done) {
+describe('Pie', function () {
+  it('should say "Pie"', function (done) {
     request
       .get('/')
       .expect(200)
-      .expect('Hello World', done)
+      .expect('Pie', done)
   })
 })
-
