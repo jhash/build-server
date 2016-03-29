@@ -1,7 +1,10 @@
 import Koa from 'koa'
 const app = new Koa()
 
+const APP_NAME = 'build'
 const PORT_NUMBER = 3000
+
+app.name = APP_NAME
 
 // x-response-time
 
