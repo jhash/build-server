@@ -3,11 +3,13 @@ const app = new Koa()
 
 const APP_NAME = 'build'
 const PORT_NUMBER = 3000
-
 app.name = APP_NAME
 
-// x-response-time
+import pg from 'pg'
+const pgURL = 'postgres://jhash:@localhost/build'
+app.context.pg = new pg.Client(pgURL)
 
+// x-response-time
 app.use(async (ctx, next) => {
   var start = new Date
   await next()
@@ -16,7 +18,6 @@ app.use(async (ctx, next) => {
 })
 
 // logger
-
 app.use(async (ctx, next) => {
   var start = new Date
   await next()
@@ -39,6 +40,13 @@ app.use(async (ctx) => {
   ctx.body = body // ctx instead of this
 })
 
-app.listen(PORT_NUMBER, () => console.log(`server started ${PORT_NUMBER}`))
+// Connect db before starting server
+app.context.pg.connect(function(err) {
+  if (err) {
+    return console.error('could not connect to postgres', err);
+  }
+  app.listen(PORT_NUMBER, () => console.log(`server started ${PORT_NUMBER}`))
+})
+
 
 export default app
