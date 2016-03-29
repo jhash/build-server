@@ -35,9 +35,15 @@ app.use(async (ctx, next) => {
   }
 })
 
+import Users from './controllers/users'
+const userController = new Users(app)
+
 app.use(async (ctx) => {
-  const body = await (() => { return 'Pie' })() // await instead of yield
-  ctx.body = body // ctx instead of this
+  if (ctx.path.match(`/${Users.TABLE_NAME}`)) {
+    ctx.body = await userController.run.call(userController, ctx.path.substr(`/${Users.TABLE_NAME}`.length), ctx)
+  } else {
+    ctx.body = '404'
+  }
 })
 
 // Connect db before starting server
