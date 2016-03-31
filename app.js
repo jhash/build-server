@@ -28,21 +28,32 @@ app.use(async (ctx, next) => {
 // response
 app.use(async (ctx, next) => {
   try {
-    await next() // next is now a function
+    await next()
   } catch (err) {
+    console.error(err.stack)
     ctx.body = { message: err.message }
     ctx.status = err.status || 500
   }
 })
 
+import koaBody from 'koa-body'
+app.use(koaBody({
+  formidable: {
+    uploadDir: __dirname
+  }
+}))
+
 import Users from './controllers/users'
 const userController = new Users(app)
 
 app.use(async (ctx) => {
-  if (ctx.path.match(`/${Users.TABLE_NAME}`)) {
-    ctx.body = await userController.run.call(userController, ctx.path.substr(`/${Users.TABLE_NAME}`.length), ctx)
-  } else {
-    ctx.body = '404'
+  let urlPaths = ctx.path.substr(1).split('/')
+  switch (urlPaths[0]) {
+    case `${userController.TABLE_NAME}`:
+      ctx.body = await userController.run.call(userController, urlPaths.splice(1), ctx)
+      break
+    default:
+      throw new Error('Page not found')
   }
 })
 

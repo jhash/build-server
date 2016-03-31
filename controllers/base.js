@@ -1,26 +1,30 @@
-export default class ModelBase {
-  async run (path, ctx, next) {
-    if (path[0] === '/') path = path.substr(1)
+import _ from 'lodash'
 
+export default class ModelBase {
+  async run (subPaths, ctx, next) {
     this.ctx = ctx
 
+    var params = this.ctx.request.body
+
     return new Promise((resolve, reject) => {
-      if (path === '') {
+      if (!subPaths.length) {
         if (ctx.method === 'GET') {
-          return this.index.call(this, resolve, reject)
+          return this.index.call(this, resolve, reject, params)
         } else if (ctx.method === 'POST') {
-          return this.post.call(this, resolve, reject)
-        } else {
-          return this.options.call(this, resolve, reject)
+          return this.post.call(this, resolve, reject, params)
+        } else if (ctx.method === 'OPTIONS')  {
+          return this.options.call(this, resolve, reject, params)
         }
-      } else if (!path.match('/')) {
-        const id = path.trim()
+      } else {
+        const slugOrID = _.toNumber(subPaths[0]) == subPaths[0] ? 'id' : 'slug'
+        Object.assign(params, { [slugOrID]: subPaths[0] })
+
         if (ctx.method === 'GET') {
-          return this.get.call(this, resolve, reject, id)
+          return this.get.call(this, resolve, reject, params)
         } else if (ctx.method === 'PUT') {
-          return this.put.call(this, resolve, reject, id)
+          return this.put.call(this, resolve, reject, params)
         } else if (ctx.method === 'DELETE') {
-          return this.delete.call(this, resolve, reject, id)
+          return this.delete.call(this, resolve, reject, params)
         }
       }
 
@@ -28,7 +32,7 @@ export default class ModelBase {
     })
   }
   defaultMethod (resolve, reject) {
-    reject(new Error(`Method not allowed.`))
+    reject(new Error(`Method not found.`))
   }
   head () {
     return this.defaultMethod.apply(this, arguments)
@@ -51,7 +55,7 @@ export default class ModelBase {
   options () {
     return this.defaultMethod.apply(this, arguments)
   }
-  trace (resolve, reject) {
-    this.body = "Smart! But you can't trace."
+  trace () {
+    return this.defaultMethod.apply(this, arguments)
   }
 }
