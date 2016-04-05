@@ -22,7 +22,11 @@ export default class Users extends ModelBase {
     let whereParam = params.id ? 'id' : 'slug'
     let slugOrID = params.id ? params.id : params.slug
 
-    this.ctx.pg.query(`SELECT * FROM ${this.TABLE_NAME} WHERE ${whereParam}=$1`, [
+    this.ctx.pg.query(`SELECT *
+      FROM ${this.TABLE_NAME}
+      WHERE ${whereParam}=$1
+      LIMIT 1
+    `, [
       slugOrID
     ], (error, result) => {
       if (error) return reject(new Error(`${this.MODEL_NAME} not found.`))
@@ -43,7 +47,10 @@ export default class Users extends ModelBase {
       return `${key}=$${index + 2}`
     }).join(', ')
 
-    this.ctx.pg.query(`UPDATE ${this.TABLE_NAME} SET ${paramsList} WHERE ${whereParam}=$1`, [
+    this.ctx.pg.query(`UPDATE ${this.TABLE_NAME}
+      SET ${paramsList}
+      WHERE ${whereParam}=$1
+    `, [
       slugOrID
     ].concat(paramValues), (error, result) => {
       if (error) return reject(new Error(`${this.MODEL_NAME} not found.`))
@@ -64,7 +71,10 @@ export default class Users extends ModelBase {
       return `${key}=$${index + 2}`
     }).join(', ')
 
-    this.ctx.pg.query(`UPDATE ${this.TABLE_NAME} SET ${paramsList} WHERE ${whereParam}=$1`, [
+    this.ctx.pg.query(`UPDATE ${this.TABLE_NAME}
+      SET ${paramsList}
+      WHERE ${whereParam}=$1
+    `, [
       slugOrID
     ].concat(paramValues), (error, result) => {
       if (error) return reject(new Error(`${this.MODEL_NAME} not found.`))
@@ -85,8 +95,10 @@ export default class Users extends ModelBase {
       resolve(`${this.MODEL_NAME} successfully added.`)
     })
   }
-  index (resolve, reject) {
-    this.ctx.pg.query(`SELECT * FROM ${this.TABLE_NAME}`, (error, result) => {
+  index (resolve, reject, index) {
+    this.ctx.pg.query(`SELECT *
+      FROM ${this.TABLE_NAME}
+    `, (error, result) => {
       if (error) return reject(new Error(`No ${this.MODEL_NAME_PLURAL} found.`))
       resolve(result.rows)
     })
