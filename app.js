@@ -9,6 +9,11 @@ import pg from 'pg'
 const pgURL = 'postgres://jhash:@localhost/build'
 app.context.pg = new pg.Client(pgURL)
 
+import BuildError, { NOT_FOUND } from './responses/error'
+
+import Users from './models/users/users'
+const userController = new Users(app)
+
 // x-response-time
 app.use(async (ctx, next) => {
   var start = new Date
@@ -43,9 +48,6 @@ app.use(koaBody({
   }
 }))
 
-import Users from './models/users/users'
-const userController = new Users(app)
-
 app.use(async (ctx) => {
   let urlPaths = ctx.path.substr(1).split('/')
   switch (urlPaths[0]) {
@@ -53,7 +55,7 @@ app.use(async (ctx) => {
       ctx.body = await userController.run.call(userController, urlPaths.splice(1), ctx)
       break
     default:
-      throw new Error('Page not found')
+      throw new BuildError(NOT_FOUND)
   }
 })
 
