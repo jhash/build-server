@@ -9,6 +9,7 @@ export const GONE = 410
 export const UNSUPPORTED_MEDIA_TYPE = 415
 export const UNPROCESSABLE_ENTITY = 422
 export const TOO_MANY_REQUESTS = 429
+export const INTERNAL_SERVER_ERROR = 500
 
 const ERROR_CODE_DEFAULT_MESSAGES = {
   [BAD_REQUEST]: 'Bad Request', // The request is malformed, such as if the body does not parse
@@ -19,7 +20,8 @@ const ERROR_CODE_DEFAULT_MESSAGES = {
   [GONE]: 'Gone', // Indicates that the resource at this end point is no longer available. Useful as a blanket response for old API versions
   [UNSUPPORTED_MEDIA_TYPE]: 'Unsupported Media Type', // If incorrect content type was provided as part of the request
   [UNPROCESSABLE_ENTITY]: 'Unprocessable Entity', // Used for validation errors
-  [TOO_MANY_REQUESTS]: 'Too Many Requests' // When a request is rejected due to rate limiting
+  [TOO_MANY_REQUESTS]: 'Too Many Requests', // When a request is rejected due to rate limiting
+  [INTERNAL_SERVER_ERROR]: 'Internal Server Error' // When a request is rejected due to rate limiting
 }
 
 class ExtendableError extends Error {
@@ -38,5 +40,6 @@ class ExtendableError extends Error {
 export default class BuildError extends ExtendableError {
   constructor(errorCode, message = ERROR_CODE_DEFAULT_MESSAGES[errorCode]) {
     super(message)
+    this.status = errorCode || INTERNAL_SERVER_ERROR
   }
 }

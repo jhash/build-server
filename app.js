@@ -10,6 +10,7 @@ const pgURL = 'postgres://jhash:@localhost/build'
 app.context.pg = new pg.Client(pgURL)
 
 import BuildError, { NOT_FOUND } from './responses/error'
+import Success, { OK } from './responses/success'
 
 import Users from './models/users/users'
 const userController = new Users(app)
@@ -36,8 +37,10 @@ app.use(async (ctx, next) => {
     await next()
   } catch (err) {
     console.error(err.stack)
-    ctx.body = { message: err.message }
-    ctx.status = err.status || 500
+    let errorCode = err.status || INTERNAL_SERVER_ERROR
+    // TODO: Add description in response to help determine issue
+    ctx.body = { status: errorCode, message: err.message }
+    ctx.status = errorCode
   }
 })
 
@@ -50,13 +53,16 @@ app.use(koaBody({
 
 app.use(async (ctx) => {
   let urlPaths = ctx.path.substr(1).split('/')
+  var result
   switch (urlPaths[0]) {
     case `${userController.TABLE_NAME}`:
-      ctx.body = await userController.run.call(userController, urlPaths.splice(1), ctx)
+      result = await userController.run.call(userController, urlPaths.splice(1), ctx)
       break
     default:
       throw new BuildError(NOT_FOUND)
   }
+  ctx.body = result.body || result
+  ctx.status = result.status || OK
 })
 
 // Connect db before starting server

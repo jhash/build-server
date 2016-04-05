@@ -13,7 +13,9 @@ const SUCCESS_DEFAULT_MESSAGES = {
 }
 
 export default class Success {
-  constructor(successCode, message = SUCCESS_DEFAULT_MESSAGES[successCode]) {
+  constructor(successCode, body, message = SUCCESS_DEFAULT_MESSAGES[successCode]) {
     this.message = message
+    this.body = body
+    this.status = successCode || OK
   }
 }
