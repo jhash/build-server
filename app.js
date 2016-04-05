@@ -43,7 +43,7 @@ app.use(koaBody({
   }
 }))
 
-import Users from './controllers/users'
+import Users from './models/users/users'
 const userController = new Users(app)
 
 app.use(async (ctx) => {
