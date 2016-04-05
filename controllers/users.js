@@ -33,7 +33,7 @@ export default class Users extends ModelBase {
       resolve(result.rows[0])
     })
   }
-  put (resolve, reject, params) {
+  patch (resolve, reject, params) {
     let setParams = _.omit(params, 'id')
     let paramKeys = _.keys(setParams)
     let paramValues = _.values(setParams)
@@ -57,7 +57,7 @@ export default class Users extends ModelBase {
       resolve(`${this.MODEL_NAME} successfully updated.`)
     })
   }
-  patch (resolve, reject, params) {
+  put (resolve, reject, params) {
     let setParams = _.omit(params, 'id')
     let paramKeys = _.keys(setParams)
     let paramValues = _.values(setParams)
