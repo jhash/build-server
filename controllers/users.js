@@ -90,7 +90,9 @@ export default class Users extends ModelBase {
     let columnNames = paramKeys.join(', ')
     let columnValues = `$${_.map(paramValues, (value, index) => { return index + 1 }).join(', $')}`
 
-    this.ctx.pg.query(`INSERT INTO ${this.TABLE_NAME}(${columnNames}) VALUES (${columnValues})`, paramValues, (error, result) => {
+    this.ctx.pg.query(`INSERT INTO ${this.TABLE_NAME}(${columnNames})
+      VALUES (${columnValues})
+    `, paramValues, (error, result) => {
       if (error) return reject(new Error(`${this.MODEL_NAME} not found.`))
       resolve(`${this.MODEL_NAME} successfully added.`)
     })
