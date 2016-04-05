@@ -24,13 +24,13 @@ const ERROR_CODE_DEFAULT_MESSAGES = {
 
 class ExtendableError extends Error {
   constructor(message) {
-    super(message);
-    this.name = this.constructor.name;
-    this.message = message;
+    super(message)
+    this.name = this.constructor.name
+    this.message = message
     if (_.isFunction(Error.captureStackTrace)) {
-      Error.captureStackTrace(this, this.constructor);
+      Error.captureStackTrace(this, this.constructor)
     } else {
-      this.stack = (new Error(message)).stack;
+      this.stack = (new Error(message)).stack
     }
   }
 }
