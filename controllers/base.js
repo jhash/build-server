@@ -21,6 +21,8 @@ export default class ModelBase {
 
         if (ctx.method === 'GET') {
           return this.get.call(this, resolve, reject, params)
+        } else if (ctx.method === 'PATCH') {
+          return this.patch.call(this, resolve, reject, params)
         } else if (ctx.method === 'PUT') {
           return this.put.call(this, resolve, reject, params)
         } else if (ctx.method === 'DELETE') {
@@ -41,6 +43,9 @@ export default class ModelBase {
     return this.defaultMethod.apply(this, arguments)
   }
   index () {
+    return this.defaultMethod.apply(this, arguments)
+  }
+  patch () {
     return this.defaultMethod.apply(this, arguments)
   }
   put () {

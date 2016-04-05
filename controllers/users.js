@@ -30,15 +30,43 @@ export default class Users extends ModelBase {
     })
   }
   put (resolve, reject, params) {
-    if (_.isUndefined(params.id) && _.isUndefined(params.slug)) return reject(new Error('Invalid parameters.'))
+    let setParams = _.omit(params, 'id')
+    let paramKeys = _.keys(setParams)
+    let paramValues = _.values(setParams)
+
+    if ((_.isUndefined(params.id) && _.isUndefined(params.slug)) || !paramKeys.length) return reject(new Error('Invalid parameters.'))
 
     let whereParam = params.id ? 'id' : 'slug'
     let slugOrID = params.id ? params.id : params.slug
 
-    this.ctx.pg.query(`UPDATE ${this.TABLE_NAME} SET last_name=$2 WHERE ${whereParam}=$1`, [
-      slugOrID,
-      params.lastName
-    ], (error, result) => {
+    let paramsList = _.map(paramKeys, (key, index) => {
+      return `${key}=$${index + 2}`
+    }).join(', ')
+
+    this.ctx.pg.query(`UPDATE ${this.TABLE_NAME} SET ${paramsList} WHERE ${whereParam}=$1`, [
+      slugOrID
+    ].concat(paramValues), (error, result) => {
+      if (error) return reject(new Error(`${this.MODEL_NAME} not found.`))
+      resolve(`${this.MODEL_NAME} successfully updated.`)
+    })
+  }
+  patch (resolve, reject, params) {
+    let setParams = _.omit(params, 'id')
+    let paramKeys = _.keys(setParams)
+    let paramValues = _.values(setParams)
+
+    if ((_.isUndefined(params.id) && _.isUndefined(params.slug)) || !paramKeys.length) return reject(new Error('Invalid parameters.'))
+
+    let whereParam = params.id ? 'id' : 'slug'
+    let slugOrID = params.id ? params.id : params.slug
+
+    let paramsList = _.map(paramKeys, (key, index) => {
+      return `${key}=$${index + 2}`
+    }).join(', ')
+
+    this.ctx.pg.query(`UPDATE ${this.TABLE_NAME} SET ${paramsList} WHERE ${whereParam}=$1`, [
+      slugOrID
+    ].concat(paramValues), (error, result) => {
       if (error) return reject(new Error(`${this.MODEL_NAME} not found.`))
       resolve(`${this.MODEL_NAME} successfully updated.`)
     })
