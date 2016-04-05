@@ -12,8 +12,8 @@ const SUCCESS_DEFAULT_MESSAGES = {
   [NOT_MODIFIED]: 'Not Modified' // Used when HTTP caching headers are in play
 }
 
-export default class Success {
-  constructor(successCode, body, message = SUCCESS_DEFAULT_MESSAGES[successCode]) {
+export default class BuildSuccess {
+  constructor(message = SUCCESS_DEFAULT_MESSAGES[successCode], successCode, body) {
     this.message = message
     this.body = body
     this.status = successCode || OK

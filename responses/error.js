@@ -38,7 +38,7 @@ class ExtendableError extends Error {
 }
 
 export default class BuildError extends ExtendableError {
-  constructor(errorCode, message = ERROR_CODE_DEFAULT_MESSAGES[errorCode]) {
+  constructor(message = ERROR_CODE_DEFAULT_MESSAGES[errorCode], errorCode) {
     super(message)
     this.status = errorCode || INTERNAL_SERVER_ERROR
   }
