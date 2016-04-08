@@ -3,7 +3,7 @@ import _ from 'lodash'
 import ModelBase from './base'
 
 import BuildError, { NOT_FOUND, UNPROCESSABLE_ENTITY } from '../responses/error'
-import BuildSuccess, { OK, CREATED, NO_CONTENT, NOT_MODIFIED } from '../responses/success'
+import BuildSuccess, { OK, CREATED, NO_CONTENT } from '../responses/success'
 
 export default class PublicModel extends ModelBase {
   index (resolve, reject, index) {
@@ -34,6 +34,26 @@ export default class PublicModel extends ModelBase {
       // TODO: This is bad for security - someone can tell if this model exists or not
       if (!result.rows.length) return reject(new BuildError(`${this.MODEL_NAME} not found`, NOT_FOUND))
       resolve(result.rows[0])
+    })
+  }
+  delete (resolve, reject, params) {
+    if (_.isUndefined(params.id) && _.isUndefined(params.slug)) return reject(new BuildError('Invalid parameters', UNPROCESSABLE_ENTITY))
+
+    let whereParam = params.id ? 'id' : 'slug'
+    let slugOrID = params.id ? params.id : params.slug
+
+    // TODO: Don't use *, return default set of params or params listed in 'fields' param
+    this.ctx.pg.query(`DELETE
+      FROM ${this.TABLE_NAME}
+      WHERE ${whereParam}=$1
+      RETURNING *
+    `, [
+      slugOrID
+    ], (error, result) => {
+      if (error) return reject(error)
+      // TODO: This is bad for security - someone can tell if this model exists or not
+      if (!result.rows.length) return reject(new BuildError(`${this.MODEL_NAME} not found`, NOT_FOUND))
+      resolve(new BuildSuccess(`${this.MODEL_NAME} successfully deleted`, NO_CONTENT))
     })
   }
   patch (resolve, reject, params) {
