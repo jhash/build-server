@@ -7,6 +7,7 @@ import BuildSuccess, { OK, CREATED, NO_CONTENT, NOT_MODIFIED } from '../response
 
 export default class PublicModel extends ModelBase {
   index (resolve, reject, index) {
+    // TODO: Add pagination support
     // TODO: Don't use *, return default set of params or params listed in 'fields' param
     this.ctx.pg.query(`SELECT *
       FROM ${this.TABLE_NAME}
