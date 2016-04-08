@@ -50,11 +50,14 @@ export default class PublicModel extends ModelBase {
     this.ctx.pg.query(`UPDATE ${this.TABLE_NAME}
       SET ${paramsList}
       WHERE ${whereParam}=$1
+      RETURNING *
     `, [
       slugOrID
     ].concat(paramValues), (error, result) => {
-      if (error) return reject(new BuildError(`${this.MODEL_NAME} not found.`))
-      resolve(`${this.MODEL_NAME} successfully updated.`)
+      if (error) return reject(new BuildError(`${this.MODEL_NAME} not found`))
+      // TODO: This is bad for security - someone can tell if this model exists or not
+      if (!result.rows.length) return reject(new BuildError(`${this.MODEL_NAME} not found`, NOT_FOUND))
+      resolve(new BuildSuccess(`${this.MODEL_NAME} successfully updated`, OK, result.rows[0]))
     })
   }
   put (resolve, reject, params) {
@@ -74,11 +77,14 @@ export default class PublicModel extends ModelBase {
     this.ctx.pg.query(`UPDATE ${this.TABLE_NAME}
       SET ${paramsList}
       WHERE ${whereParam}=$1
+      RETURNING *
     `, [
       slugOrID
     ].concat(paramValues), (error, result) => {
       if (error) return reject(error)
-      resolve(`${this.MODEL_NAME} successfully updated.`)
+      // TODO: This is bad for security - someone can tell if this model exists or not
+      if (!result.rows.length) return reject(new BuildError(`${this.MODEL_NAME} not found`, NOT_FOUND))
+      resolve(new BuildSuccess(`${this.MODEL_NAME} successfully updated`, OK, result.rows[0]))
     })
   }
   post (resolve, reject, params) {
@@ -94,7 +100,7 @@ export default class PublicModel extends ModelBase {
       VALUES (${columnValues})
     `, paramValues, (error, result) => {
       if (error) return reject(error)
-      resolve(`${this.MODEL_NAME} successfully added.`)
+      resolve(new BuildSuccess(`${this.MODEL_NAME} successfully added`, CREATED))
     })
   }
 }

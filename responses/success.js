@@ -16,7 +16,7 @@ export default class BuildSuccess {
   constructor (message, successCode = OK, body) {
     if (!message) message = SUCCESS_DEFAULT_MESSAGES[successCode]
     this.message = message
-    this.body = body
     this.status = successCode
+    this.body = body
   }
 }
