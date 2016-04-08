@@ -7,6 +7,7 @@ import BuildSuccess, { OK, CREATED, NO_CONTENT, NOT_MODIFIED } from '../response
 
 export default class PublicModel extends ModelBase {
   index (resolve, reject, index) {
+    // TODO: Don't use *, return default set of params or params listed in 'fields' param
     this.ctx.pg.query(`SELECT *
       FROM ${this.TABLE_NAME}
     `, (error, result) => {
@@ -20,6 +21,7 @@ export default class PublicModel extends ModelBase {
     let whereParam = params.id ? 'id' : 'slug'
     let slugOrID = params.id ? params.id : params.slug
 
+    // TODO: Don't use *, return default set of params or params listed in 'fields' param
     this.ctx.pg.query(`SELECT *
       FROM ${this.TABLE_NAME}
       WHERE ${whereParam}=$1
@@ -47,6 +49,7 @@ export default class PublicModel extends ModelBase {
       return `${key}=$${index + 2}`
     }).join(', ')
 
+    // TODO: Don't use *, return default set of params or params listed in 'fields' param
     this.ctx.pg.query(`UPDATE ${this.TABLE_NAME}
       SET ${paramsList}
       WHERE ${whereParam}=$1
@@ -74,6 +77,7 @@ export default class PublicModel extends ModelBase {
       return `${key}=$${index + 2}`
     }).join(', ')
 
+    // TODO: Don't use *, return default set of params or params listed in 'fields' param
     this.ctx.pg.query(`UPDATE ${this.TABLE_NAME}
       SET ${paramsList}
       WHERE ${whereParam}=$1
@@ -96,11 +100,15 @@ export default class PublicModel extends ModelBase {
     let columnNames = paramKeys.join(', ')
     let columnValues = `$${_.map(paramValues, (value, index) => { return index + 1 }).join(', $')}`
 
+    // TODO: Don't use *, return default set of params or params listed in 'fields' param
     this.ctx.pg.query(`INSERT INTO ${this.TABLE_NAME}(${columnNames})
       VALUES (${columnValues})
+      RETURNING *
     `, paramValues, (error, result) => {
       if (error) return reject(error)
-      resolve(new BuildSuccess(`${this.MODEL_NAME} successfully added`, CREATED))
+      // Make sure that a model was actually created
+      if (!result.rows.length) return reject(new BuildError(`Failed to create ${this.MODEL_NAME}`))
+      resolve(new BuildSuccess(`${this.MODEL_NAME} successfully added`, CREATED, result.rows[0]))
     })
   }
 }
