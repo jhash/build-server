@@ -7,6 +7,7 @@ export default class ModelBase {
     this.ctx = ctx
 
     var params = this.ctx.request.body
+    var whereParams = {}
     var method = null
 
     return new Promise((resolve, reject) => {
@@ -23,9 +24,9 @@ export default class ModelBase {
         // Add slug or ID to params
         const slugOrID = _.toNumber(subPaths[0]) == subPaths[0] ? 'id' : 'slug'
 
-        Object.assign(params, {
-          whereParamName: slugOrID,
-          whereParamValue: subPaths[0]
+        Object.assign(whereParams, {
+          name: slugOrID,
+          value: subPaths[0]
         })
 
         if (ctx.method === 'GET') {
@@ -46,15 +47,15 @@ export default class ModelBase {
         if (authenticationError) return reject(authenticationError)
 
         // Call the method
-        return this[method].call(this, resolve, reject, params)
+        return this[method].call(this, resolve, reject, params, whereParams)
       }
 
       // TODO: determine if this is the right error or not
       // Return not found error
-      return this.defaultMethod.call(this, resolve, reject)
+      return this.defaultMethod.call(this, reject)
     })
   }
-  defaultMethod (resolve, reject) {
+  defaultMethod (reject) {
     reject(new BuildError(null, NOT_FOUND))
   }
   authenticate (method) {

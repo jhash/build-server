@@ -16,16 +16,16 @@ export default class PublicModel extends ModelBase {
       resolve(result.rows)
     })
   }
-  get (resolve, reject, params) {
-    if (_.isUndefined(params.whereParamValue) || _.isUndefined(params.whereParamName)) return reject(new BuildError('Invalid parameters', UNPROCESSABLE_ENTITY))
+  get (resolve, reject, params, whereParams) {
+    if (_.isUndefined(whereParams.value) || _.isUndefined(whereParams.name)) return reject(new BuildError('Invalid parameters', UNPROCESSABLE_ENTITY))
 
     // TODO: Don't use *, return default set of params or params listed in 'fields' param
     this.ctx.pg.query(`SELECT *
       FROM ${this.TABLE_NAME}
-      WHERE ${params.whereParamName}=$1
+      WHERE ${whereParams.name}=$1
       LIMIT 1
     `, [
-      params.whereParamValue
+      whereParams.value
     ], (error, result) => {
       if (error) return reject(error)
       // TODO: This is bad for security - someone can tell if this model exists or not
@@ -33,16 +33,16 @@ export default class PublicModel extends ModelBase {
       resolve(result.rows[0])
     })
   }
-  delete (resolve, reject, params) {
-    if (_.isUndefined(params.whereParamValue) || _.isUndefined(params.whereParamName)) return reject(new BuildError('Invalid parameters', UNPROCESSABLE_ENTITY))
+  delete (resolve, reject, params, whereParams) {
+    if (_.isUndefined(whereParams.value) || _.isUndefined(whereParams.name)) return reject(new BuildError('Invalid parameters', UNPROCESSABLE_ENTITY))
 
     // TODO: Don't use *, return default set of params or params listed in 'fields' param
     this.ctx.pg.query(`DELETE
       FROM ${this.TABLE_NAME}
-      WHERE ${params.whereParamName}=$1
+      WHERE ${whereParams.name}=$1
       RETURNING *
     `, [
-      params.whereParamValue
+      whereParams.value
     ], (error, result) => {
       if (error) return reject(error)
       // TODO: This is bad for security - someone can tell if this model exists or not
@@ -50,12 +50,12 @@ export default class PublicModel extends ModelBase {
       resolve(new BuildSuccess(`${this.MODEL_NAME} successfully deleted`, NO_CONTENT))
     })
   }
-  patch (resolve, reject, params) {
-    let setParams = _.omit(params, ['whereParamValue', 'whereParamName'])
-    let paramKeys = _.keys(setParams)
-    let paramValues = _.values(setParams)
+  patch (resolve, reject, params, whereParams) {
+    let paramKeys = _.keys(params)
 
-    if (_.isUndefined(params.whereParamValue) || _.isUndefined(params.whereParamName) || !paramKeys.length) return reject(new BuildError('Invalid parameters', UNPROCESSABLE_ENTITY))
+    if (_.isUndefined(whereParams.value) || _.isUndefined(whereParams.name) || !paramKeys.length) return reject(new BuildError('Invalid parameters', UNPROCESSABLE_ENTITY))
+
+    let paramValues = _.values(params)
 
     let paramsList = _.map(paramKeys, (key, index) => {
       return `${key}=$${index + 2}`
@@ -64,10 +64,10 @@ export default class PublicModel extends ModelBase {
     // TODO: Don't use *, return default set of params or params listed in 'fields' param
     this.ctx.pg.query(`UPDATE ${this.TABLE_NAME}
       SET ${paramsList}
-      WHERE ${params.whereParamName}=$1
+      WHERE ${whereParams.name}=$1
       RETURNING *
     `, [
-      params.whereParamValue
+      whereParams.value
     ].concat(paramValues), (error, result) => {
       if (error) return reject(new BuildError(`${this.MODEL_NAME} not found`))
       // TODO: This is bad for security - someone can tell if this model exists or not
@@ -75,13 +75,13 @@ export default class PublicModel extends ModelBase {
       resolve(new BuildSuccess(`${this.MODEL_NAME} successfully updated`, OK, result.rows[0]))
     })
   }
-  put (resolve, reject, params) {
-    let setParams = _.omit(params, ['whereParamValue', 'whereParamName'])
-    let paramKeys = _.keys(setParams)
-    let paramValues = _.values(setParams)
+  put (resolve, reject, params, whereParams) {
+    let paramKeys = _.keys(params)
 
     // TODO: Make sure the entire set of required fields is included
-    if (_.isUndefined(params.whereParamValue) || _.isUndefined(params.whereParamName) || !paramKeys.length) return reject(new BuildError('Invalid parameters', UNPROCESSABLE_ENTITY))
+    if (_.isUndefined(whereParams.value) || _.isUndefined(whereParams.name) || !paramKeys.length) return reject(new BuildError('Invalid parameters', UNPROCESSABLE_ENTITY))
+
+    let paramValues = _.values(params)
 
     let paramsList = _.map(paramKeys, (key, index) => {
       return `${key}=$${index + 2}`
@@ -90,10 +90,10 @@ export default class PublicModel extends ModelBase {
     // TODO: Don't use *, return default set of params or params listed in 'fields' param
     this.ctx.pg.query(`UPDATE ${this.TABLE_NAME}
       SET ${paramsList}
-      WHERE ${params.whereParamName}=$1
+      WHERE ${whereParams.name}=$1
       RETURNING *
     `, [
-      params.whereParamValue
+      whereParams.value
     ].concat(paramValues), (error, result) => {
       if (error) return reject(error)
       // TODO: This is bad for security - someone can tell if this model exists or not
@@ -103,10 +103,11 @@ export default class PublicModel extends ModelBase {
   }
   post (resolve, reject, params) {
     let paramKeys = _.keys(params)
-    let paramValues = _.values(params)
 
     // TODO: Make sure the entire set of required fields is included
     if (!paramKeys.length) return reject(new BuildError('Invalid parameters', UNPROCESSABLE_ENTITY))
+
+    let paramValues = _.values(params)
 
     let columnNames = paramKeys.join(', ')
     let columnValues = `$${_.map(paramValues, (value, index) => { return index + 1 }).join(', $')}`
