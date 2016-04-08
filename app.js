@@ -46,11 +46,14 @@ app.use(async (ctx, next) => {
   try {
     await next()
   } catch (err) {
-    // console.error(err.stack)
     let errorCode = err.status || INTERNAL_SERVER_ERROR
     // TODO: Add description in response to help determine issue
     ctx.body = { status: errorCode, message: err.message }
     ctx.status = errorCode
+
+    // TODO: Make methods of these checks
+    // TODO: Make prettier
+    if (String(ctx.status)[0] === '5') console.error(err.stack)
   }
 })
 
@@ -78,7 +81,7 @@ app.use(async (ctx) => {
 // Connect db before starting server
 app.context.pg.connect(function(err) {
   if (err) {
-    return console.error('could not connect to postgres', err);
+    return console.error('could not connect to postgres', err)
   }
   app.listen(PORT_NUMBER, () => console.log(`server started ${PORT_NUMBER}`))
 })
