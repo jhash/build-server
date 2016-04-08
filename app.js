@@ -80,9 +80,14 @@ app.use(async (ctx) => {
 
 // Connect db before starting server
 app.context.pg.connect(function(err) {
-  if (err) {
-    return console.error('could not connect to postgres', err)
-  }
+  if (err) return console.error('Could not connect to postgres', err)
+  //
+  app.context.pg.query("SELECT table_name FROM information_schema.tables WHERE table_schema='public' AND table_type='BASE TABLE';", function (err, result) {
+    if (err) return console.error('Failed to fetch tables', err)
+    console.log('All table names', _.map(result.rows, 'table_name'));
+  })
+
+  // Launch the server
   app.listen(PORT_NUMBER, () => console.log(`server started ${PORT_NUMBER}`))
 })
 
