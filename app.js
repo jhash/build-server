@@ -9,7 +9,7 @@ import pg from 'pg'
 const pgURL = 'postgres://jhash:@localhost/build'
 app.context.pg = new pg.Client(pgURL)
 
-import BuildError, { NOT_FOUND } from './responses/error'
+import BuildError, { NOT_FOUND, INTERNAL_SERVER_ERROR } from './responses/error'
 import BuildSuccess, { OK } from './responses/success'
 
 import Users from './models/users/users'

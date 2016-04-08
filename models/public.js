@@ -10,7 +10,7 @@ export default class PublicModel extends ModelBase {
     this.ctx.pg.query(`SELECT *
       FROM ${this.TABLE_NAME}
     `, (error, result) => {
-      if (error) return reject(new BuildError())
+      if (error) return reject(error)
       console.log('length', result.rows.length);
       resolve(result.rows)
     })
@@ -28,7 +28,7 @@ export default class PublicModel extends ModelBase {
     `, [
       slugOrID
     ], (error, result) => {
-      if (error) return reject(new BuildError())
+      if (error) return reject(error)
       // TODO: This is bad for security - someone can tell if this model exists or not
       if (!result.rows.length) return reject(new BuildError(`${this.MODEL_NAME} not found`, NOT_FOUND))
       resolve(result.rows[0])
@@ -78,7 +78,7 @@ export default class PublicModel extends ModelBase {
     `, [
       slugOrID
     ].concat(paramValues), (error, result) => {
-      if (error) return reject(new BuildError())
+      if (error) return reject(error)
       resolve(`${this.MODEL_NAME} successfully updated.`)
     })
   }
@@ -94,7 +94,7 @@ export default class PublicModel extends ModelBase {
     this.ctx.pg.query(`INSERT INTO ${this.TABLE_NAME}(${columnNames})
       VALUES (${columnValues})
     `, paramValues, (error, result) => {
-      if (error) return reject(new BuildError())
+      if (error) return reject(error)
       resolve(`${this.MODEL_NAME} successfully added.`)
     })
   }

@@ -25,7 +25,7 @@ const ERROR_CODE_DEFAULT_MESSAGES = {
 }
 
 class ExtendableError extends Error {
-  constructor(message) {
+  constructor (message) {
     super(message)
     this.name = this.constructor.name
     this.message = message
@@ -38,7 +38,7 @@ class ExtendableError extends Error {
 }
 
 export default class BuildError extends ExtendableError {
-  constructor(message, errorCode = INTERNAL_SERVER_ERROR) {
+  constructor (message, errorCode = INTERNAL_SERVER_ERROR) {
     if (!message) message = ERROR_CODE_DEFAULT_MESSAGES[errorCode]
     super(message)
     this.status = errorCode

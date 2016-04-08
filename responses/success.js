@@ -13,7 +13,7 @@ const SUCCESS_DEFAULT_MESSAGES = {
 }
 
 export default class BuildSuccess {
-  constructor(message, successCode = OK, body) {
+  constructor (message, successCode = OK, body) {
     if (!message) message = SUCCESS_DEFAULT_MESSAGES[successCode]
     this.message = message
     this.body = body
