@@ -15,6 +15,15 @@ import BuildSuccess, { OK } from './responses/success'
 import Users from './models/users/users'
 const userController = new Users(app)
 
+import _ from 'lodash'
+
+// prettify response
+app.use(async (ctx, next) => {
+  await next()
+  if (_.isObject(ctx.body)) ctx.body = JSON.stringify(ctx.body, null, 2)
+})
+
+
 // x-response-time
 app.use(async (ctx, next) => {
   var start = new Date
