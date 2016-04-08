@@ -36,7 +36,7 @@ app.use(async (ctx, next) => {
   try {
     await next()
   } catch (err) {
-    console.error(err.stack)
+    // console.error(err.stack)
     let errorCode = err.status || INTERNAL_SERVER_ERROR
     // TODO: Add description in response to help determine issue
     ctx.body = { status: errorCode, message: err.message }
