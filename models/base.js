@@ -22,7 +22,11 @@ export default class ModelBase {
       } else {
         // Add slug or ID to params
         const slugOrID = _.toNumber(subPaths[0]) == subPaths[0] ? 'id' : 'slug'
-        Object.assign(params, { [slugOrID]: subPaths[0] })
+
+        Object.assign(params, {
+          whereParamName: slugOrID,
+          whereParamValue: subPaths[0]
+        })
 
         if (ctx.method === 'GET') {
           method = 'get'
