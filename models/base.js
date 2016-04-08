@@ -1,66 +1,59 @@
 import _ from 'lodash'
 
+import BuildError, { FORBIDDEN, NOT_FOUND } from '../responses/error'
+
 export default class ModelBase {
   async run (subPaths, ctx, next) {
     this.ctx = ctx
 
     var params = this.ctx.request.body
+    var method = null
 
     return new Promise((resolve, reject) => {
+      // Find a matching method to call
       if (!subPaths.length) {
         if (ctx.method === 'GET') {
-          return this.index.call(this, resolve, reject, params)
+          method = 'index'
         } else if (ctx.method === 'POST') {
-          return this.post.call(this, resolve, reject, params)
+          method = 'post'
         } else if (ctx.method === 'OPTIONS')  {
-          return this.options.call(this, resolve, reject, params)
+          method = 'options'
         }
       } else {
+        // Add slug or ID to params
         const slugOrID = _.toNumber(subPaths[0]) == subPaths[0] ? 'id' : 'slug'
         Object.assign(params, { [slugOrID]: subPaths[0] })
 
         if (ctx.method === 'GET') {
-          return this.get.call(this, resolve, reject, params)
+          method = 'get'
         } else if (ctx.method === 'PATCH') {
-          return this.patch.call(this, resolve, reject, params)
+          method = 'patch'
         } else if (ctx.method === 'PUT') {
-          return this.put.call(this, resolve, reject, params)
+          method = 'put'
         } else if (ctx.method === 'DELETE') {
-          return this.delete.call(this, resolve, reject, params)
+          method = 'delete'
         }
       }
 
+      // If this method is defined
+      if (method && _.isFunction(this[method])) {
+        // Authenticate this user's ability to call this method
+        let authenticationError = this.authenticate(method)
+        if (authenticationError) return reject(authenticationError)
+
+        // Call the method
+        return this[method].call(this, resolve, reject, params)
+      }
+
+      // TODO: determine if this is the right error or not
+      // Return not found error
       return this.defaultMethod.call(this, resolve, reject)
     })
   }
   defaultMethod (resolve, reject) {
-    reject(new Error(`Method not found.`))
+    reject(new BuildError(null, NOT_FOUND))
   }
-  head () {
-    return this.defaultMethod.apply(this, arguments)
-  }
-  get () {
-    return this.defaultMethod.apply(this, arguments)
-  }
-  index () {
-    return this.defaultMethod.apply(this, arguments)
-  }
-  patch () {
-    return this.defaultMethod.apply(this, arguments)
-  }
-  put () {
-    return this.defaultMethod.apply(this, arguments)
-  }
-  post () {
-    return this.defaultMethod.apply(this, arguments)
-  }
-  delete () {
-    return this.defaultMethod.apply(this, arguments)
-  }
-  options () {
-    return this.defaultMethod.apply(this, arguments)
-  }
-  trace () {
-    return this.defaultMethod.apply(this, arguments)
+  authenticate (method) {
+    if (false) return new BuildError(null, FORBIDDEN)
   }
 }
