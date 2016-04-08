@@ -16,11 +16,12 @@ import Users from './models/users/users'
 const userController = new Users(app)
 
 import _ from 'lodash'
+const NUMBER_OF_SPACES_PER_TAB = 2
 
 // prettify response
 app.use(async (ctx, next) => {
   await next()
-  if (_.isObject(ctx.body)) ctx.body = JSON.stringify(ctx.body, null, 2)
+  if (_.isObject(ctx.body)) ctx.body = JSON.stringify(ctx.body, null, NUMBER_OF_SPACES_PER_TAB)
 })
 
 
