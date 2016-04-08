@@ -11,7 +11,6 @@ export default class PublicModel extends ModelBase {
       FROM ${this.TABLE_NAME}
     `, (error, result) => {
       if (error) return reject(error)
-      console.log('length', result.rows.length);
       resolve(result.rows)
     })
   }
