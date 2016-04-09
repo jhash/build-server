@@ -21,6 +21,7 @@ const NUMBER_OF_SPACES_PER_TAB = 2
 // prettify response
 app.use(async (ctx, next) => {
   await next()
+  // If we are returning an object, stringify and prettify the response
   if (_.isObject(ctx.body)) ctx.body = JSON.stringify(ctx.body, null, NUMBER_OF_SPACES_PER_TAB)
 })
 
