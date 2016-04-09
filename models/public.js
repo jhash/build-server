@@ -69,6 +69,7 @@ export default class PublicModel extends ModelBase {
     `, [
       whereParams.value
     ].concat(paramValues), (error, result) => {
+      // TODO: need better messages for errors like duplicate key errors
       if (error) return reject(error)
       // TODO: This is bad for security - someone can tell if this model exists or not
       if (!result.rows.length) return reject(new BuildError(`${this.modelName} not found`, NOT_FOUND))
