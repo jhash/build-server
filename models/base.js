@@ -43,8 +43,7 @@ export default class ModelBase {
       // If this method is defined
       if (method && _.isFunction(this[method])) {
         // Authenticate this user's ability to call this method
-        let authenticationError = this.authenticate(method)
-        if (authenticationError) return reject(authenticationError)
+        if (!this.authenticated(method)) return reject(new BuildError(null, FORBIDDEN))
 
         // Call the method
         return this[method].call(this, resolve, reject, params, whereParams)
@@ -58,7 +57,7 @@ export default class ModelBase {
   defaultMethod (reject) {
     reject(new BuildError(null, NOT_FOUND))
   }
-  authenticate (method) {
-    if (false) return new BuildError(null, FORBIDDEN)
+  authenticated (method) {
+    return true
   }
 }

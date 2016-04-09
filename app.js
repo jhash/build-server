@@ -81,10 +81,11 @@ app.use(async (ctx) => {
 // Connect db before starting server
 app.context.pg.connect(function(err) {
   if (err) return console.error('Could not connect to postgres', err)
-  //
+
+  // TODO: use something like this to build the possible routes?
   app.context.pg.query("SELECT table_name FROM information_schema.tables WHERE table_schema='public' AND table_type='BASE TABLE';", function (err, result) {
     if (err) return console.error('Failed to fetch tables', err)
-    console.log('All table names', _.map(result.rows, 'table_name'));
+    console.log('All table names', _.map(result.rows, 'table_name'))
   })
 
   // Launch the server
