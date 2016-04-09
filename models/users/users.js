@@ -21,7 +21,7 @@ const ID = 'id'
 // Schemas
 
 // Post Request
-const POST_REQUEST_SCHEMA = {
+const POST_PUT_REQUEST_SCHEMA = {
   type: OBJECT,
   properties: {
     [FIRST_NAME]: { type: STRING },
@@ -32,24 +32,8 @@ const POST_REQUEST_SCHEMA = {
   additionalProperties: false
 }
 
-// Post Response
-const POST_RESPONSE_SCHEMA = {
-  type: OBJECT,
-  properties: {
-    [FIRST_NAME]: { type: STRING },
-    [LAST_NAME]: { type: STRING },
-    [EMAIL]: { type: STRING },
-    [SLUG]: { type: STRING },
-    [ID]: { type: NUMBER }
-  },
-  required: [FIRST_NAME, LAST_NAME, EMAIL, SLUG, ID],
-  additionalProperties: false
-}
-
 // Put Request
 // === POST_RESPONSE_SCHEMA
-
-// Put Response
 
 // Patch Request
 const PATCH_REQUEST_SCHEMA = {
@@ -67,6 +51,30 @@ const PATCH_REQUEST_SCHEMA = {
   additionalProperties: false
 }
 
+// Get and Delete Requests
+const EMPTY_REQUEST_SCHEMA = {
+  additionalProperties: false
+}
+
+// Full Response
+const FULL_RESPONSE_SCHEMA = {
+  type: OBJECT,
+  properties: {
+    [FIRST_NAME]: { type: STRING },
+    [LAST_NAME]: { type: STRING },
+    [EMAIL]: { type: STRING },
+    [SLUG]: { type: STRING },
+    [ID]: { type: NUMBER }
+  },
+  required: [FIRST_NAME, LAST_NAME, EMAIL, SLUG, ID],
+  additionalProperties: false
+}
+
+// Delete Response
+const EMPTY_RESPONSE_SCHEMA = {
+  additionalProperties: false
+}
+
 export default class Users extends PublicModel {
   get modelName () {
     return MODEL_NAME
@@ -78,12 +86,21 @@ export default class Users extends PublicModel {
     return TABLE_NAME
   }
   get postRequestSchema () {
-    return POST_REQUEST_SCHEMA
+    return POST_PUT_REQUEST_SCHEMA
   }
   get putRequestSchema () {
-    return POST_REQUEST_SCHEMA
+    return POST_PUT_REQUEST_SCHEMA
   }
   get patchRequestSchema () {
     return PATCH_REQUEST_SCHEMA
+  }
+  get getRequestSchema () {
+    return EMPTY_REQUEST_SCHEMA
+  }
+  get indexRequestSchema () {
+    return EMPTY_REQUEST_SCHEMA
+  }
+  get deleteRequestSchema () {
+    return EMPTY_REQUEST_SCHEMA
   }
 }

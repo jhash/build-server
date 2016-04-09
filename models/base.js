@@ -5,6 +5,8 @@ import BuildError, { FORBIDDEN, NOT_FOUND, UNPROCESSABLE_ENTITY } from '../respo
 import Ajv from 'ajv'
 let ajv = Ajv()
 
+import { REQUEST_MAP, REQUEST_MAP_WITH_ID } from '../requests/types'
+
 export default class ModelBase {
   async run (subPaths, ctx, next) {
     this.ctx = ctx
@@ -16,13 +18,7 @@ export default class ModelBase {
     return new Promise((resolve, reject) => {
       // Find a matching method to call
       if (!subPaths.length) {
-        if (ctx.method === 'GET') {
-          method = 'index'
-        } else if (ctx.method === 'POST') {
-          method = 'post'
-        } else if (ctx.method === 'OPTIONS')  {
-          method = 'options'
-        }
+        method = REQUEST_MAP[ctx.method]
       } else {
         // Add slug or ID to params
         const slugOrID = _.toNumber(subPaths[0]) == subPaths[0] ? 'id' : 'slug'
@@ -32,15 +28,7 @@ export default class ModelBase {
           value: subPaths[0]
         })
 
-        if (ctx.method === 'GET') {
-          method = 'get'
-        } else if (ctx.method === 'PATCH') {
-          method = 'patch'
-        } else if (ctx.method === 'PUT') {
-          method = 'put'
-        } else if (ctx.method === 'DELETE') {
-          method = 'delete'
-        }
+        method = REQUEST_MAP_WITH_ID[ctx.method]
       }
 
       // If this method is defined
