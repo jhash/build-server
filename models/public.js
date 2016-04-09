@@ -69,7 +69,7 @@ export default class PublicModel extends ModelBase {
     `, [
       whereParams.value
     ].concat(paramValues), (error, result) => {
-      if (error) return reject(new BuildError(`${this.modelName} not found`))
+      if (error) return reject(error)
       // TODO: This is bad for security - someone can tell if this model exists or not
       if (!result.rows.length) return reject(new BuildError(`${this.modelName} not found`, NOT_FOUND))
       resolve(new BuildSuccess(`${this.modelName} successfully updated`, OK, result.rows[0]))
