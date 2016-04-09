@@ -5,11 +5,45 @@ import PublicModel from '../public'
 const MODEL_NAME = 'User'
 const MODEL_NAME_PLURAL = 'Users'
 const TABLE_NAME = 'users'
-const POST_SCHEMA = {
-  type: 'object',
+
+// Property types
+const STRING = 'string'
+const NUMBER = 'number'
+const OBJECT = 'object'
+
+// User columns
+const FIRST_NAME = 'first_name'
+const LAST_NAME = 'last_name'
+const SLUG = 'slug'
+const EMAIL = 'email'
+const ID = 'id'
+
+// Schemas
+
+// Post Request
+const POST_REQUEST_SCHEMA = {
+  type: OBJECT,
   properties: {
-    
-  }
+    [FIRST_NAME]: { type: STRING },
+    [LAST_NAME]: { type: STRING },
+    [EMAIL]: { type: STRING }
+  },
+  required: [FIRST_NAME, LAST_NAME, EMAIL],
+  additionalProperties: false
+}
+
+// Post Request
+const POST_RESPONSE_SCHEMA = {
+  type: OBJECT,
+  properties: {
+    [FIRST_NAME]: { type: STRING },
+    [LAST_NAME]: { type: STRING },
+    [EMAIL]: { type: STRING },
+    [SLUG]: { type: STRING },
+    [ID]: { type: NUMBER }
+  },
+  required: [FIRST_NAME, LAST_NAME, EMAIL, SLUG, ID],
+  additionalProperties: false
 }
 
 export default class Users extends PublicModel {
@@ -22,7 +56,7 @@ export default class Users extends PublicModel {
   get tableName () {
     return TABLE_NAME
   }
-  get postSchema () {
-    return POST_SCHEMA
+  get postRequestSchema () {
+    return POST_REQUEST_SCHEMA
   }
 }

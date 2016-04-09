@@ -1,6 +1,9 @@
 import _ from 'lodash'
 
-import BuildError, { FORBIDDEN, NOT_FOUND } from '../responses/error'
+import BuildError, { FORBIDDEN, NOT_FOUND, UNPROCESSABLE_ENTITY } from '../responses/error'
+
+import Ajv from 'ajv'
+let ajv = Ajv()
 
 export default class ModelBase {
   async run (subPaths, ctx, next) {
@@ -44,6 +47,14 @@ export default class ModelBase {
       if (method && _.isFunction(this[method])) {
         // Authenticate this user's ability to call this method
         if (!this.authenticated(method)) return reject(new BuildError(null, FORBIDDEN))
+
+        // Validate request data
+        let requestValidationSchema = this[`${method}RequestSchema`]
+        if (requestValidationSchema) {
+          var validate = ajv.compile(requestValidationSchema)
+          var valid = validate(params)
+          if (!valid) return reject(new BuildError('Invalid parameters', UNPROCESSABLE_ENTITY, _.map(validate.errors, 'message')))
+        }
 
         // Call the method
         return this[method].call(this, resolve, reject, params, whereParams)

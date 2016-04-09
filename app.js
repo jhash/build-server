@@ -49,7 +49,7 @@ app.use(async (ctx, next) => {
   } catch (err) {
     let errorCode = err.status || INTERNAL_SERVER_ERROR
     // TODO: Add description in response to help determine issue
-    ctx.body = { status: errorCode, message: err.message }
+    ctx.body = Object.assign({ status: errorCode }, _.pick(err, ['message', 'errors', 'description']))
     ctx.status = errorCode
 
     // TODO: Make methods of these checks

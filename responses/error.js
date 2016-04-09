@@ -29,6 +29,8 @@ class ExtendableError extends Error {
     super(message)
     this.name = this.constructor.name
     this.message = message
+
+    // TODO: This is for backwards compatibility? - not needed on node?
     if (_.isFunction(Error.captureStackTrace)) {
       Error.captureStackTrace(this, this.constructor)
     } else {
@@ -37,10 +39,12 @@ class ExtendableError extends Error {
   }
 }
 
+// TODO: return better description in response
 export default class BuildError extends ExtendableError {
-  constructor (message, errorCode = INTERNAL_SERVER_ERROR) {
+  constructor (message, errorCode = INTERNAL_SERVER_ERROR, errorList) {
     if (!message) message = ERROR_CODE_DEFAULT_MESSAGES[errorCode]
     super(message)
     this.status = errorCode
+    this.errors = errorList
   }
 }
