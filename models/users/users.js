@@ -2,6 +2,8 @@ import _ from 'lodash'
 
 import PublicModel from '../public'
 
+import { POST, PUT, PATCH, GET, INDEX, DELETE } from '../../requests/types'
+
 const MODEL_NAME = 'User'
 const MODEL_NAME_PLURAL = 'Users'
 const TABLE_NAME = 'users'
@@ -20,7 +22,7 @@ const ID = 'id'
 
 // Schemas
 
-// Post Request
+// POST and PUT Requests
 const POST_PUT_REQUEST_SCHEMA = {
   type: OBJECT,
   properties: {
@@ -32,10 +34,7 @@ const POST_PUT_REQUEST_SCHEMA = {
   additionalProperties: false
 }
 
-// Put Request
-// === POST_RESPONSE_SCHEMA
-
-// Patch Request
+// PATCH Request
 const PATCH_REQUEST_SCHEMA = {
   type: OBJECT,
   properties: {
@@ -48,11 +47,6 @@ const PATCH_REQUEST_SCHEMA = {
     { required: [LAST_NAME] },
     { required: [EMAIL] }
   ],
-  additionalProperties: false
-}
-
-// Get and Delete Requests
-const EMPTY_REQUEST_SCHEMA = {
   additionalProperties: false
 }
 
@@ -70,11 +64,6 @@ const FULL_RESPONSE_SCHEMA = {
   additionalProperties: false
 }
 
-// Delete Response
-const EMPTY_RESPONSE_SCHEMA = {
-  additionalProperties: false
-}
-
 export default class Users extends PublicModel {
   get modelName () {
     return MODEL_NAME
@@ -85,22 +74,11 @@ export default class Users extends PublicModel {
   get tableName () {
     return TABLE_NAME
   }
-  get postRequestSchema () {
-    return POST_PUT_REQUEST_SCHEMA
-  }
-  get putRequestSchema () {
-    return POST_PUT_REQUEST_SCHEMA
-  }
-  get patchRequestSchema () {
-    return PATCH_REQUEST_SCHEMA
-  }
-  get getRequestSchema () {
-    return EMPTY_REQUEST_SCHEMA
-  }
-  get indexRequestSchema () {
-    return EMPTY_REQUEST_SCHEMA
-  }
-  get deleteRequestSchema () {
-    return EMPTY_REQUEST_SCHEMA
+  get requestSchemas () {
+    return {
+      [POST]: POST_PUT_REQUEST_SCHEMA,
+      [PUT]: POST_PUT_REQUEST_SCHEMA,
+      [PATCH]: PATCH_REQUEST_SCHEMA
+    }
   }
 }

@@ -8,6 +8,9 @@ let ajv = Ajv()
 import { REQUEST_MAP, REQUEST_MAP_WITH_ID } from '../requests/types'
 
 export default class ModelBase {
+  get requestSchemas () {
+    return {}
+  }
   async run (subPaths, ctx, next) {
     this.ctx = ctx
 
@@ -20,15 +23,15 @@ export default class ModelBase {
       if (!subPaths.length) {
         method = REQUEST_MAP[ctx.method]
       } else {
-        // Add slug or ID to params
-        const slugOrID = _.toNumber(subPaths[0]) == subPaths[0] ? 'id' : 'slug'
+        method = REQUEST_MAP_WITH_ID[ctx.method]
 
+        // Add slug or ID to params
+        // TODO: add constraint that slug cannot just be a number
+        const slugOrID = _.toNumber(subPaths[0]) == subPaths[0] ? 'id' : 'slug'
         Object.assign(whereParams, {
           name: slugOrID,
           value: subPaths[0]
         })
-
-        method = REQUEST_MAP_WITH_ID[ctx.method]
       }
 
       // If this method is defined
@@ -37,7 +40,7 @@ export default class ModelBase {
         if (!this.authenticated(method)) return reject(new BuildError(null, FORBIDDEN))
 
         // Validate request data
-        let requestValidationSchema = this[`${method}RequestSchema`]
+        let requestValidationSchema = this.requestSchemas[method]
         if (requestValidationSchema) {
           var validate = ajv.compile(requestValidationSchema)
           var valid = validate(params)
