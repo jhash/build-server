@@ -32,7 +32,7 @@ const POST_REQUEST_SCHEMA = {
   additionalProperties: false
 }
 
-// Post Request
+// Post Response
 const POST_RESPONSE_SCHEMA = {
   type: OBJECT,
   properties: {
@@ -43,6 +43,27 @@ const POST_RESPONSE_SCHEMA = {
     [ID]: { type: NUMBER }
   },
   required: [FIRST_NAME, LAST_NAME, EMAIL, SLUG, ID],
+  additionalProperties: false
+}
+
+// Put Request
+// === POST_RESPONSE_SCHEMA
+
+// Put Response
+
+// Patch Request
+const PATCH_REQUEST_SCHEMA = {
+  type: OBJECT,
+  properties: {
+    [FIRST_NAME]: { type: STRING },
+    [LAST_NAME]: { type: STRING },
+    [EMAIL]: { type: STRING }
+  },
+  anyOf: [
+    { required: [FIRST_NAME] },
+    { required: [LAST_NAME] },
+    { required: [EMAIL] }
+  ],
   additionalProperties: false
 }
 
@@ -58,5 +79,11 @@ export default class Users extends PublicModel {
   }
   get postRequestSchema () {
     return POST_REQUEST_SCHEMA
+  }
+  get putRequestSchema () {
+    return POST_REQUEST_SCHEMA
+  }
+  get patchRequestSchema () {
+    return PATCH_REQUEST_SCHEMA
   }
 }
