@@ -10,7 +10,7 @@ export default class PublicModel extends ModelBase {
     // TODO: Add pagination support
     // TODO: Don't use *, return default set of params or params listed in 'fields' param
     this.ctx.pg.query(`SELECT *
-      FROM ${this.TABLE_NAME}
+      FROM ${this.tableName}
     `, (error, result) => {
       if (error) return reject(error)
       resolve(result.rows)
@@ -21,7 +21,7 @@ export default class PublicModel extends ModelBase {
 
     // TODO: Don't use *, return default set of params or params listed in 'fields' param
     this.ctx.pg.query(`SELECT *
-      FROM ${this.TABLE_NAME}
+      FROM ${this.tableName}
       WHERE ${whereParams.name}=$1
       LIMIT 1
     `, [
@@ -29,7 +29,7 @@ export default class PublicModel extends ModelBase {
     ], (error, result) => {
       if (error) return reject(error)
       // TODO: This is bad for security - someone can tell if this model exists or not
-      if (!result.rows.length) return reject(new BuildError(`${this.MODEL_NAME} not found`, NOT_FOUND))
+      if (!result.rows.length) return reject(new BuildError(`${this.modelName} not found`, NOT_FOUND))
       resolve(result.rows[0])
     })
   }
@@ -38,7 +38,7 @@ export default class PublicModel extends ModelBase {
 
     // TODO: Don't use *, return default set of params or params listed in 'fields' param
     this.ctx.pg.query(`DELETE
-      FROM ${this.TABLE_NAME}
+      FROM ${this.tableName}
       WHERE ${whereParams.name}=$1
       RETURNING *
     `, [
@@ -46,8 +46,8 @@ export default class PublicModel extends ModelBase {
     ], (error, result) => {
       if (error) return reject(error)
       // TODO: This is bad for security - someone can tell if this model exists or not
-      if (!result.rows.length) return reject(new BuildError(`${this.MODEL_NAME} not found`, NOT_FOUND))
-      resolve(new BuildSuccess(`${this.MODEL_NAME} successfully deleted`, NO_CONTENT))
+      if (!result.rows.length) return reject(new BuildError(`${this.modelName} not found`, NOT_FOUND))
+      resolve(new BuildSuccess(`${this.modelName} successfully deleted`, NO_CONTENT))
     })
   }
   patch (resolve, reject, params, whereParams) {
@@ -62,17 +62,17 @@ export default class PublicModel extends ModelBase {
     }).join(', ')
 
     // TODO: Don't use *, return default set of params or params listed in 'fields' param
-    this.ctx.pg.query(`UPDATE ${this.TABLE_NAME}
+    this.ctx.pg.query(`UPDATE ${this.tableName}
       SET ${paramsList}
       WHERE ${whereParams.name}=$1
       RETURNING *
     `, [
       whereParams.value
     ].concat(paramValues), (error, result) => {
-      if (error) return reject(new BuildError(`${this.MODEL_NAME} not found`))
+      if (error) return reject(new BuildError(`${this.modelName} not found`))
       // TODO: This is bad for security - someone can tell if this model exists or not
-      if (!result.rows.length) return reject(new BuildError(`${this.MODEL_NAME} not found`, NOT_FOUND))
-      resolve(new BuildSuccess(`${this.MODEL_NAME} successfully updated`, OK, result.rows[0]))
+      if (!result.rows.length) return reject(new BuildError(`${this.modelName} not found`, NOT_FOUND))
+      resolve(new BuildSuccess(`${this.modelName} successfully updated`, OK, result.rows[0]))
     })
   }
   put (resolve, reject, params, whereParams) {
@@ -88,7 +88,7 @@ export default class PublicModel extends ModelBase {
     }).join(', ')
 
     // TODO: Don't use *, return default set of params or params listed in 'fields' param
-    this.ctx.pg.query(`UPDATE ${this.TABLE_NAME}
+    this.ctx.pg.query(`UPDATE ${this.tableName}
       SET ${paramsList}
       WHERE ${whereParams.name}=$1
       RETURNING *
@@ -97,8 +97,8 @@ export default class PublicModel extends ModelBase {
     ].concat(paramValues), (error, result) => {
       if (error) return reject(error)
       // TODO: This is bad for security - someone can tell if this model exists or not
-      if (!result.rows.length) return reject(new BuildError(`${this.MODEL_NAME} not found`, NOT_FOUND))
-      resolve(new BuildSuccess(`${this.MODEL_NAME} successfully updated`, OK, result.rows[0]))
+      if (!result.rows.length) return reject(new BuildError(`${this.modelName} not found`, NOT_FOUND))
+      resolve(new BuildSuccess(`${this.modelName} successfully updated`, OK, result.rows[0]))
     })
   }
   post (resolve, reject, params) {
@@ -113,14 +113,14 @@ export default class PublicModel extends ModelBase {
     let columnValues = `$${_.map(paramValues, (value, index) => { return index + 1 }).join(', $')}`
 
     // TODO: Don't use *, return default set of params or params listed in 'fields' param
-    this.ctx.pg.query(`INSERT INTO ${this.TABLE_NAME}(${columnNames})
+    this.ctx.pg.query(`INSERT INTO ${this.tableName}(${columnNames})
       VALUES (${columnValues})
       RETURNING *
     `, paramValues, (error, result) => {
       if (error) return reject(error)
       // Make sure that a model was actually created
-      if (!result.rows.length) return reject(new BuildError(`Failed to create ${this.MODEL_NAME}`))
-      resolve(new BuildSuccess(`${this.MODEL_NAME} successfully added`, CREATED, result.rows[0]))
+      if (!result.rows.length) return reject(new BuildError(`Failed to create ${this.modelName}`))
+      resolve(new BuildSuccess(`${this.modelName} successfully added`, CREATED, result.rows[0]))
     })
   }
 }

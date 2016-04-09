@@ -67,9 +67,9 @@ app.use(koaBody({
 
 app.use(async (ctx) => {
   let urlPaths = ctx.path.substr(1).split('/')
-  var result
+  var result = {}
   switch (urlPaths[0]) {
-    case `${userController.TABLE_NAME}`:
+    case `${userController.tableName}`:
       result = await userController.run.call(userController, urlPaths.splice(1), ctx)
       break
     default:

@@ -5,15 +5,24 @@ import PublicModel from '../public'
 const MODEL_NAME = 'User'
 const MODEL_NAME_PLURAL = 'Users'
 const TABLE_NAME = 'users'
+const POST_SCHEMA = {
+  type: 'object',
+  properties: {
+    
+  }
+}
 
 export default class Users extends PublicModel {
-  get MODEL_NAME () {
+  get modelName () {
     return MODEL_NAME
   }
-  get MODEL_NAME_PLURAL () {
+  get modelNamePlural () {
     return MODEL_NAME_PLURAL
   }
-  get TABLE_NAME () {
+  get tableName () {
     return TABLE_NAME
+  }
+  get postSchema () {
+    return POST_SCHEMA
   }
 }

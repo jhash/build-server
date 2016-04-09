@@ -24,6 +24,7 @@
   },
   "homepage": "https://github.com/geekplux/koa2-boilerplate#readme",
   "dependencies": {
+    "ajv": "^3.8.8",
     "koa": "^2.0.0-alpha.3",
     "koa-body": "^1.4.0",
     "lodash": "^4.6.1",
