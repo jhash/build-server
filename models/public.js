@@ -5,22 +5,25 @@ import ModelBase from './base'
 import BuildError, { NOT_FOUND, UNPROCESSABLE_ENTITY } from '../responses/error'
 import BuildSuccess, { OK, CREATED, NO_CONTENT } from '../responses/success'
 
+// TODO: put these on the model specific to the method being called
+const DEFAULT_PARAMS = '*'
+
 export default class PublicModel extends ModelBase {
-  index (resolve, reject, index) {
+  index (resolve, reject, params, whereParams, fields = DEFAULT_PARAMS) {
     // TODO: Add pagination support
     // TODO: Don't use *, return default set of params or params listed in 'fields' param
-    this.ctx.pg.query(`SELECT *
+    this.ctx.pg.query(`SELECT ${fields}
       FROM ${this.tableName}
     `, (error, result) => {
       if (error) return reject(error)
       resolve(result.rows)
     })
   }
-  get (resolve, reject, params, whereParams) {
+  get (resolve, reject, params, whereParams, fields = DEFAULT_PARAMS) {
     if (_.isUndefined(whereParams.value) || _.isUndefined(whereParams.name)) return reject(new BuildError('Invalid parameters', UNPROCESSABLE_ENTITY))
 
     // TODO: Don't use *, return default set of params or params listed in 'fields' param
-    this.ctx.pg.query(`SELECT *
+    this.ctx.pg.query(`SELECT ${fields}
       FROM ${this.tableName}
       WHERE ${whereParams.name}=$1
       LIMIT 1
@@ -33,14 +36,14 @@ export default class PublicModel extends ModelBase {
       resolve(result.rows[0])
     })
   }
-  delete (resolve, reject, params, whereParams) {
+  delete (resolve, reject, params, whereParams, fields = DEFAULT_PARAMS) {
     if (_.isUndefined(whereParams.value) || _.isUndefined(whereParams.name)) return reject(new BuildError('Invalid parameters', UNPROCESSABLE_ENTITY))
 
     // TODO: Don't use *, return default set of params or params listed in 'fields' param
     this.ctx.pg.query(`DELETE
       FROM ${this.tableName}
       WHERE ${whereParams.name}=$1
-      RETURNING *
+      RETURNING ${fields}
     `, [
       whereParams.value
     ], (error, result) => {
@@ -50,7 +53,7 @@ export default class PublicModel extends ModelBase {
       resolve(new BuildSuccess(`${this.modelName} successfully deleted`, NO_CONTENT))
     })
   }
-  patch (resolve, reject, params, whereParams) {
+  patch (resolve, reject, params, whereParams, fields = DEFAULT_PARAMS) {
     let paramKeys = _.keys(params)
 
     if (_.isUndefined(whereParams.value) || _.isUndefined(whereParams.name) || !paramKeys.length) return reject(new BuildError('Invalid parameters', UNPROCESSABLE_ENTITY))
@@ -65,7 +68,7 @@ export default class PublicModel extends ModelBase {
     this.ctx.pg.query(`UPDATE ${this.tableName}
       SET ${paramsList}
       WHERE ${whereParams.name}=$1
-      RETURNING *
+      RETURNING ${fields}
     `, [
       whereParams.value
     ].concat(paramValues), (error, result) => {
@@ -76,7 +79,7 @@ export default class PublicModel extends ModelBase {
       resolve(new BuildSuccess(`${this.modelName} successfully updated`, OK, result.rows[0]))
     })
   }
-  put (resolve, reject, params, whereParams) {
+  put (resolve, reject, params, whereParams, fields = DEFAULT_PARAMS) {
     let paramKeys = _.keys(params)
 
     // TODO: Make sure the entire set of required fields is included
@@ -92,7 +95,7 @@ export default class PublicModel extends ModelBase {
     this.ctx.pg.query(`UPDATE ${this.tableName}
       SET ${paramsList}
       WHERE ${whereParams.name}=$1
-      RETURNING *
+      RETURNING ${fields}
     `, [
       whereParams.value
     ].concat(paramValues), (error, result) => {
@@ -102,7 +105,7 @@ export default class PublicModel extends ModelBase {
       resolve(new BuildSuccess(`${this.modelName} successfully updated`, OK, result.rows[0]))
     })
   }
-  post (resolve, reject, params) {
+  post (resolve, reject, params, whereParams, fields = DEFAULT_PARAMS) {
     let paramKeys = _.keys(params)
 
     // TODO: Make sure the entire set of required fields is included
@@ -116,7 +119,7 @@ export default class PublicModel extends ModelBase {
     // TODO: Don't use *, return default set of params or params listed in 'fields' param
     this.ctx.pg.query(`INSERT INTO ${this.tableName}(${columnNames})
       VALUES (${columnValues})
-      RETURNING *
+      RETURNING ${fields}
     `, paramValues, (error, result) => {
       if (error) return reject(error)
       // Make sure that a model was actually created

@@ -22,10 +22,9 @@ export default class ModelBase {
 
     var params = this.ctx.request.body
     var whereParams = {}
-    var method = null
+    var method
 
-    // TODO: Make sure that the fields passed are columns on this model
-    var fields = null
+    var fields
     if (params && params.fields) {
       fields = params.fields
       params = _.omit(params, 'fields')
@@ -54,6 +53,10 @@ export default class ModelBase {
       // Authenticate this user's ability to call this method
       // TODO: pass more things to this?
       if (!this.authenticated(method)) return reject(new BuildError(null, FORBIDDEN))
+
+      // Validate the fields requested
+      // TODO: Make sure that the fields passed are columns on this model - based on user authentication level?
+      if (fields && (!_.isString(fields) || fields.indexOf('*') !== -1)) return reject(new BuildError('Invalid fields requested', UNPROCESSABLE_ENTITY))
 
       // Validate request data
       let requestValidationSchema = this.requestSchemas[method]
