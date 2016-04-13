@@ -15,6 +15,7 @@ export const REQUEST_MAP = {
 export const REQUEST_MAP_WITH_ID = {
   [DELETE.toUpperCase()]: DELETE,
   [PATCH.toUpperCase()]: PATCH,
+  [POST.toUpperCase()]: GET,
   [GET.toUpperCase()]: GET,
   [PUT.toUpperCase()]: PUT
 }

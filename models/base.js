@@ -24,6 +24,13 @@ export default class ModelBase {
     var whereParams = {}
     var method = null
 
+    // TODO: Make sure that the fields passed are columns on this model
+    var fields = null
+    if (params && params.fields) {
+      fields = params.fields
+      params = _.omit(params, 'fields')
+    }
+
     // Find a matching method to call
     if (!subPaths.length) {
       method = REQUEST_MAP[ctx.method]
@@ -40,47 +47,49 @@ export default class ModelBase {
     }
 
     return new Promise((resolve, reject) => {
-      // If this method is defined
-      if (method && _.isFunction(this[method])) {
-        // Authenticate this user's ability to call this method
-        if (!this.authenticated(method)) return reject(new BuildError(null, FORBIDDEN))
-
-        // Validate request data
-        let requestValidationSchema = this.requestSchemas[method]
-        if (requestValidationSchema) {
-          var validate = ajv.compile(requestValidationSchema)
-          var valid = validate(params)
-          if (!valid) return reject(new BuildError('Invalid parameters', UNPROCESSABLE_ENTITY, _.map(validate.errors, 'message')))
-        }
-
-        // Call the method
-        return new Promise((responseResolve, responseReject) => {
-          this[method].call(this, responseResolve, responseReject, params, whereParams)
-        }).then((body) => {
-          // TODO: maybe this should only be in tests?
-          // TODO: Maybe do this async?
-
-          // Validate response data
-          let responseValidationSchema = this.responseSchemas[method]
-          if (responseValidationSchema) {
-            var validate = ajv.compile(responseValidationSchema)
-            var valid = validate(body)
-            if (!valid) {
-              // TODO: save this validation error somewhere so we can fix it?
-              // TODO: should we reject?
-              // TODO: remove this
-              console.log(validate.errors);
-              // return reject(new BuildError('Invalid response format', INTERNAL_SERVER_ERROR, validate.errors, 'message'))
-            }
-          }
-
-          return resolve(body)
-        }).catch(reject)
-      }
-
       // TODO: determine if this is the right error or not
       // Return not found error
-      return reject(new BuildError(null, NOT_FOUND))
+      if (!method || !_.isFunction(this[method])) return reject(new BuildError(null, NOT_FOUND))
+
+      // Authenticate this user's ability to call this method
+      // TODO: pass more things to this?
+      if (!this.authenticated(method)) return reject(new BuildError(null, FORBIDDEN))
+
+      // Validate request data
+      let requestValidationSchema = this.requestSchemas[method]
+      if (requestValidationSchema) {
+        var validate = ajv.compile(requestValidationSchema)
+        var valid = validate(params)
+        if (!valid) return reject(new BuildError('Invalid parameters', UNPROCESSABLE_ENTITY, _.map(validate.errors, 'message')))
+      }
+
+      // Call the method
+      return new Promise((responseResolve, responseReject) => {
+        this[method].call(this, responseResolve, responseReject, params, whereParams, fields)
+      }).then((body) => {
+        // TODO: maybe this should only be in tests?
+        // TODO: Maybe do this async?
+
+        // If we are passed fields, don't bother with response validation for now
+        // TODO: add validation that the fields requested are
+        if (fields) return resolve(body)
+
+        // Validate response data
+        let responseValidationSchema = this.responseSchemas[method]
+        if (responseValidationSchema) {
+          var validate = ajv.compile(responseValidationSchema)
+          var valid = validate(body)
+          if (!valid) {
+            // TODO: save this validation error somewhere so we can fix it?
+            // TODO: should we reject?
+            // TODO: remove this
+            console.log(validate.errors);
+            // return reject(new BuildError('Invalid response format', INTERNAL_SERVER_ERROR, validate.errors, 'message'))
+          }
+        }
+
+        return resolve(body)
+      }).catch(reject)
     })
   }
 }
