@@ -12,6 +12,7 @@ const TABLE_NAME = 'users'
 const STRING = 'string'
 const NUMBER = 'number'
 const OBJECT = 'object'
+const ARRAY = 'array'
 
 // User columns
 const FIRST_NAME = 'first_name'
@@ -23,7 +24,7 @@ const ID = 'id'
 // Schemas
 
 // POST and PUT Requests
-const POST_PUT_REQUEST_SCHEMA = {
+const USERS_POST_PUT_REQUEST_SCHEMA = {
   type: OBJECT,
   properties: {
     [FIRST_NAME]: { type: STRING },
@@ -35,7 +36,7 @@ const POST_PUT_REQUEST_SCHEMA = {
 }
 
 // PATCH Request
-const PATCH_REQUEST_SCHEMA = {
+const USERS_PATCH_REQUEST_SCHEMA = {
   type: OBJECT,
   properties: {
     [FIRST_NAME]: { type: STRING },
@@ -51,7 +52,7 @@ const PATCH_REQUEST_SCHEMA = {
 }
 
 // Full Response
-const FULL_RESPONSE_SCHEMA = {
+const USERS_FULL_RESPONSE_SCHEMA = {
   type: OBJECT,
   properties: {
     [FIRST_NAME]: { type: STRING },
@@ -61,7 +62,12 @@ const FULL_RESPONSE_SCHEMA = {
     [ID]: { type: NUMBER }
   },
   required: [FIRST_NAME, LAST_NAME, EMAIL, SLUG, ID],
-  additionalProperties: false
+  additionalProperties: true
+}
+
+const USERS_FULL_RESPONSE_LIST_SCHEMA = {
+  type: ARRAY,
+  items: [USERS_FULL_RESPONSE_SCHEMA]
 }
 
 export default class Users extends PublicModel {
@@ -76,9 +82,15 @@ export default class Users extends PublicModel {
   }
   get requestSchemas () {
     return {
-      [POST]: POST_PUT_REQUEST_SCHEMA,
-      [PUT]: POST_PUT_REQUEST_SCHEMA,
-      [PATCH]: PATCH_REQUEST_SCHEMA
+      [POST]: USERS_POST_PUT_REQUEST_SCHEMA,
+      [PUT]: USERS_POST_PUT_REQUEST_SCHEMA,
+      [PATCH]: USERS_PATCH_REQUEST_SCHEMA
+    }
+  }
+  get responseSchemas () {
+    return {
+      [GET]: USERS_FULL_RESPONSE_SCHEMA,
+      [INDEX]: USERS_FULL_RESPONSE_LIST_SCHEMA
     }
   }
 }
