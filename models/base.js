@@ -20,7 +20,12 @@ export default class ModelBase {
   get allFields () {
     return []
   }
-  authenticated (method) {
+  get methodRestrictions () {
+    return {}
+  }
+  authenticated (method, userLevel) {
+    let restrictions = this.methodRestrictions[userLevel]
+    if (restrictions && restrictions[method]) return false
     return true
   }
   async run (subPaths, ctx, next) {
@@ -37,7 +42,7 @@ export default class ModelBase {
     }
 
     // TODO: implement auth and use level here
-    const USER_LEVEL = 'connected'
+    const USER_LEVEL = 'public'
 
     // Find a matching method to call
     if (!subPaths.length) {
@@ -61,7 +66,7 @@ export default class ModelBase {
 
       // Authenticate this user's ability to call this method
       // TODO: pass more things to this?
-      if (!this.authenticated(method)) return reject(new BuildError(null, FORBIDDEN))
+      if (!this.authenticated(method, USER_LEVEL)) return reject(new BuildError(null, FORBIDDEN))
 
       // Validate the fields requested
       // TODO: Make sure that the fields passed are columns on this model - based on user authentication level?

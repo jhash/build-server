@@ -24,6 +24,7 @@ const ID = 'id'
 // User fields
 const ALL_FIELDS = [FIRST_NAME, LAST_NAME, SLUG, EMAIL, ID]
 const CONNECTED_FIELDS = [FIRST_NAME, LAST_NAME, SLUG, ID]
+const PRIVATE_FIELDS = [FIRST_NAME, LAST_NAME, SLUG, ID]
 const PUBLIC_FIELDS = [ID, SLUG]
 
 // Schemas
@@ -107,10 +108,28 @@ export default class Users extends PublicModel {
       owner: ALL_FIELDS,
       administrator: ALL_FIELDS,
       connected: CONNECTED_FIELDS,
+      private: PRIVATE_FIELDS,
       public: PUBLIC_FIELDS
     }
   }
   get allFields () {
     return ALL_FIELDS
+  }
+  get methodRestrictions () {
+    // TODO: get these keys from the auth class
+    return {
+      connected: {
+        [PUT]: true,
+        [PATCH]: true
+      },
+      private: {
+        [PUT]: true,
+        [PATCH]: true
+      },
+      public: {
+        [PUT]: true,
+        [PATCH]: true
+      }
+    }
   }
 }
