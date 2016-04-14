@@ -34,9 +34,10 @@ const USERS_POST_PUT_REQUEST_SCHEMA = {
   properties: {
     [FIRST_NAME]: { type: STRING },
     [LAST_NAME]: { type: STRING },
-    [EMAIL]: { type: STRING }
+    [EMAIL]: { type: STRING },
+    [SLUG]: { type: STRING }
   },
-  required: [FIRST_NAME, LAST_NAME, EMAIL],
+  required: [FIRST_NAME, LAST_NAME, EMAIL, SLUG],
   additionalProperties: false
 }
 
@@ -46,12 +47,14 @@ const USERS_PATCH_REQUEST_SCHEMA = {
   properties: {
     [FIRST_NAME]: { type: STRING },
     [LAST_NAME]: { type: STRING },
-    [EMAIL]: { type: STRING }
+    [EMAIL]: { type: STRING },
+    [SLUG]: { type: STRING },
   },
   anyOf: [
     { required: [FIRST_NAME] },
     { required: [LAST_NAME] },
-    { required: [EMAIL] }
+    { required: [EMAIL] },
+    { required: [SLUG] }
   ],
   additionalProperties: false
 }
