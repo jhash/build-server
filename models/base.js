@@ -1,6 +1,6 @@
 import _ from 'lodash'
 
-import BuildError, { FORBIDDEN, NOT_FOUND, UNPROCESSABLE_ENTITY, INTERNAL_SERVER_ERROR } from '../responses/error'
+import BuildError, { FORBIDDEN, NOT_FOUND, UNPROCESSABLE_ENTITY, UNAUTHORIZED, INTERNAL_SERVER_ERROR } from '../responses/error'
 
 import Ajv from 'ajv'
 let ajv = Ajv()
@@ -13,6 +13,12 @@ export default class ModelBase {
   }
   get responseSchemas () {
     return {}
+  }
+  get authorizedFields () {
+    return {}
+  }
+  get allFields () {
+    return []
   }
   authenticated (method) {
     return true
@@ -29,6 +35,9 @@ export default class ModelBase {
       fields = params.fields
       params = _.omit(params, 'fields')
     }
+
+    // TODO: implement auth and use level here
+    const USER_LEVEL = 'connected'
 
     // Find a matching method to call
     if (!subPaths.length) {
@@ -56,7 +65,26 @@ export default class ModelBase {
 
       // Validate the fields requested
       // TODO: Make sure that the fields passed are columns on this model - based on user authentication level?
-      if (fields && (!_.isString(fields) || fields.indexOf('*') !== -1)) return reject(new BuildError('Invalid fields requested', UNPROCESSABLE_ENTITY))
+      if (fields) {
+        // If fields is not a string or there is a * anywhere in it, reject
+        // TODO: this is definitely susceptible to SQL injection
+        // TODO: URGENT: escape
+        if (!_.isString(fields) || fields.indexOf('*') !== -1) return reject(new BuildError('Invalid fields requested', UNPROCESSABLE_ENTITY))
+
+        // Remove white space in fields
+        fields = fields.replace(/\s+/g, '')
+
+        // Split up fields
+        let splitFields = fields.split(',')
+
+        // TODO: Specify which fields are unauthorized in error
+        if (!_.isEqual(splitFields, _.intersection(splitFields, this.authorizedFields[USER_LEVEL] || this.allFields))) return reject(new BuildError('Unauthorized to access specified fields', UNAUTHORIZED))
+      } else {
+        fields = (this.authorizedFields[USER_LEVEL] || this.allFields).join(',')
+      }
+
+      // TODO: should this be an UNPROCESSABLE_ENTITY error?
+      if (!fields.length) return reject(new BuildError('No allowed fields present', INTERNAL_SERVER_ERROR))
 
       // Validate request data
       let requestValidationSchema = this.requestSchemas[method]

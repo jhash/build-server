@@ -25,7 +25,6 @@ app.use(async (ctx, next) => {
   if (_.isObject(ctx.body)) ctx.body = JSON.stringify(ctx.body, null, NUMBER_OF_SPACES_PER_TAB)
 })
 
-
 // x-response-time
 app.use(async (ctx, next) => {
   var start = new Date

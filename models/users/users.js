@@ -21,6 +21,11 @@ const SLUG = 'slug'
 const EMAIL = 'email'
 const ID = 'id'
 
+// User fields
+const ALL_FIELDS = [FIRST_NAME, LAST_NAME, SLUG, EMAIL, ID]
+const CONNECTED_FIELDS = [FIRST_NAME, LAST_NAME, SLUG, ID]
+const PUBLIC_FIELDS = [ID, SLUG]
+
 // Schemas
 
 // POST and PUT Requests
@@ -92,5 +97,17 @@ export default class Users extends PublicModel {
       [GET]: USERS_FULL_RESPONSE_SCHEMA,
       [INDEX]: USERS_FULL_RESPONSE_LIST_SCHEMA
     }
+  }
+  get authorizedFields () {
+    // TODO: get these keys from the auth class
+    return {
+      owner: ALL_FIELDS,
+      administrator: ALL_FIELDS,
+      connected: CONNECTED_FIELDS,
+      public: PUBLIC_FIELDS
+    }
+  }
+  get allFields () {
+    return ALL_FIELDS
   }
 }
