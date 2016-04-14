@@ -67,8 +67,6 @@ export default class ModelBase {
       // TODO: Make sure that the fields passed are columns on this model - based on user authentication level?
       if (fields) {
         // If fields is not a string or there is a * anywhere in it, reject
-        // TODO: this is definitely susceptible to SQL injection
-        // TODO: URGENT: escape
         if (!_.isString(fields) || fields.indexOf('*') !== -1) return reject(new BuildError('Invalid fields requested', UNPROCESSABLE_ENTITY))
 
         // Remove white space in fields
@@ -77,6 +75,7 @@ export default class ModelBase {
         // Split up fields
         let splitFields = fields.split(',')
 
+        // This actually takes care of SQL injection on the fields parameter
         // TODO: Specify which fields are unauthorized in error
         if (!_.isEqual(splitFields, _.intersection(splitFields, this.authorizedFields[USER_LEVEL] || this.allFields))) return reject(new BuildError('Unauthorized to access specified fields', UNAUTHORIZED))
       } else {
