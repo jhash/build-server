@@ -18,6 +18,9 @@ const userController = new Users(app)
 import _ from 'lodash'
 const NUMBER_OF_SPACES_PER_TAB = 2
 
+import Authenticator from './authentication/authentication'
+let auth = new Authenticator()
+
 // prettify response
 app.use(async (ctx, next) => {
   await next()
@@ -63,6 +66,11 @@ app.use(koaBody({
     uploadDir: __dirname
   }
 }))
+
+app.use(async(ctx, next) => {
+  console.log('user', auth.user(ctx))
+  await next()
+})
 
 app.use(async (ctx) => {
   let urlPaths = ctx.path.substr(1).split('/')
