@@ -66,7 +66,7 @@ export default class ModelBase {
 
       // Authenticate this user's ability to call this method
       // TODO: pass more things to this?
-      if (!this.authenticated(method, USER_LEVEL)) return reject(new BuildError(null, FORBIDDEN))
+      if (!this.authenticated(method, USER_LEVEL)) return reject(new BuildError(null, UNAUTHORIZED))
 
       // Validate the fields requested
       // TODO: Make sure that the fields passed are columns on this model - based on user authentication level?
@@ -82,7 +82,7 @@ export default class ModelBase {
 
         // This actually takes care of SQL injection on the fields parameter
         // TODO: Specify which fields are unauthorized in error
-        if (!_.isEqual(splitFields, _.intersection(splitFields, this.authorizedFields[USER_LEVEL] || this.allFields))) return reject(new BuildError('Unauthorized to access specified fields', UNAUTHORIZED))
+        if (!_.isEqual(splitFields, _.intersection(splitFields, this.authorizedFields[USER_LEVEL] || this.allFields))) return reject(new BuildError('Unauthorized to access specified fields', FORBIDDEN))
       } else {
         fields = (this.authorizedFields[USER_LEVEL] || this.allFields).join(',')
       }
