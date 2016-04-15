@@ -3,6 +3,7 @@ import _ from 'lodash'
 import PublicModel from '../public'
 
 import { POST, PUT, PATCH, GET, INDEX, DELETE } from '../../requests/types'
+import { OWNER, ADMIN, CONNECTED, PRIVATE, PUBLIC } from '../../authentication/authentication'
 
 const MODEL_NAME = 'User'
 const MODEL_NAME_PLURAL = 'Users'
@@ -103,30 +104,28 @@ export default class Users extends PublicModel {
     }
   }
   get authorizedFields () {
-    // TODO: get these keys from the auth class
     return {
-      owner: ALL_FIELDS,
-      administrator: ALL_FIELDS,
-      connected: CONNECTED_FIELDS,
-      private: PRIVATE_FIELDS,
-      public: PUBLIC_FIELDS
+      [OWNER]: ALL_FIELDS,
+      [ADMIN]: ALL_FIELDS,
+      [CONNECTED]: CONNECTED_FIELDS,
+      [PRIVATE]: PRIVATE_FIELDS,
+      [PUBLIC]: PUBLIC_FIELDS
     }
   }
   get allFields () {
     return ALL_FIELDS
   }
   get methodRestrictions () {
-    // TODO: get these keys from the auth class
     return {
-      connected: {
+      [CONNECTED]: {
         [PUT]: true,
         [PATCH]: true
       },
-      private: {
+      PRIVATE]: {
         [PUT]: true,
         [PATCH]: true
       },
-      public: {
+      [PUBLIC]: {
         [PUT]: true,
         [PATCH]: true
       }

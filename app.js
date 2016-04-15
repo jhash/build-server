@@ -79,6 +79,7 @@ app.use(async (ctx) => {
 })
 
 // Connect db before starting server
+// TODO: use async version?
 app.context.pg.connect(function(err) {
   if (err) return console.error('Could not connect to postgres', err)
 
@@ -89,6 +90,7 @@ app.context.pg.connect(function(err) {
   })
 
   // Launch the server
+  // TODO: use async version?
   app.listen(PORT_NUMBER, () => console.log(`server started ${PORT_NUMBER}`))
 })
 

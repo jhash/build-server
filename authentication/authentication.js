@@ -1,0 +1,5 @@
+export const OWNER = 'owner'
+export const ADMIN = 'administrator'
+export const CONNECTED = 'connected'
+export const PRIVATE = 'private'
+export const PUBLIC = 'public'
