@@ -121,7 +121,7 @@ export default class Users extends PublicModel {
         [PUT]: true,
         [PATCH]: true
       },
-      PRIVATE]: {
+      [PRIVATE]: {
         [PUT]: true,
         [PATCH]: true
       },
