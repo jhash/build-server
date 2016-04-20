@@ -20,12 +20,13 @@ export default class ModelBase {
   get allFields () {
     return []
   }
-  get methodRestrictions () {
+  get allowedMethods () {
+    // TODO: Allow owners to do everything by default?
     return {}
   }
   authorized (method, userLevel) {
-    let restrictions = this.methodRestrictions[userLevel]
-    if (restrictions && restrictions[method]) return false
+    let allowedMethods = this.allowedMethods[userLevel]
+    if (!allowedMethods || !allowedMethods[method]) return false
     return true
   }
   async run (subPaths, ctx, next) {
@@ -75,8 +76,7 @@ export default class ModelBase {
       if (!this.authorized(method, USER_LEVEL)) return reject(new BuildError(null, UNAUTHORIZED))
 
       // Validate the fields requested
-      // TODO: This should probably be the opposite - no fields if no authorized fields are found
-      let authorizedFields = this.authorizedFields[USER_LEVEL] || this.allFields
+      let authorizedFields = this.authorizedFields[USER_LEVEL] || []
 
       if (fields) {
         // If fields is not a string or there is a * anywhere in it, reject

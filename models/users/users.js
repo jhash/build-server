@@ -115,22 +115,38 @@ export default class Users extends PublicModel {
   get allFields () {
     return ALL_FIELDS
   }
-  get methodRestrictions () {
+  get allowedMethods () {
     return {
-      [CONNECTIONS]: {
+      [OWNERS]: {
         [PUT]: true,
+        [GET]: true,
+        [POST]: true,
         [PATCH]: true,
+        [INDEX]: true,
         [DELETE]: true
+      },
+      [MANAGERS]: {
+        [PUT]: true,
+        [GET]: true,
+        [POST]: true,
+        [PATCH]: true,
+        [INDEX]: true,
+        [DELETE]: true
+      },
+      [CONNECTIONS]: {
+        [GET]: true,
+        [POST]: true,
+        [INDEX]: true,
       },
       [PRIVATE]: {
-        [PUT]: true,
-        [PATCH]: true,
-        [DELETE]: true
+        [GET]: true,
+        [POST]: true,
+        [INDEX]: true
       },
       [PUBLIC]: {
-        [PUT]: true,
-        [PATCH]: true,
-        [DELETE]: true
+        [GET]: true,
+        [POST]: true,
+        [INDEX]: true
       }
     }
   }
