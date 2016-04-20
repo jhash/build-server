@@ -41,6 +41,9 @@ export default class ModelBase {
       params = _.omit(params, 'fields')
     }
 
+    let paramKeys = _.keys(params)
+    let paramValues = _.values(params)
+
     // TODO: implement auth and use level here
     const USER_LEVEL = 'public'
 
@@ -109,7 +112,7 @@ export default class ModelBase {
 
       // Call the method
       return new Promise((responseResolve, responseReject) => {
-        this[method].call(this, responseResolve, responseReject, params, whereParams, fields)
+        this[method].call(this, responseResolve, responseReject, paramKeys, paramValues, whereParams, fields)
       }).then((body) => {
         // TODO: maybe this should only be in tests?
         // TODO: Maybe do this async?

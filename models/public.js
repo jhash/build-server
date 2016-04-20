@@ -6,9 +6,8 @@ import BuildError, { NOT_FOUND, UNPROCESSABLE_ENTITY } from '../responses/error'
 import BuildSuccess, { OK, CREATED, NO_CONTENT } from '../responses/success'
 
 export default class PublicModel extends ModelBase {
-  index (resolve, reject, params, whereParams, fields) {
+  index (resolve, reject, paramKeys, paramValues, whereParams, fields) {
     // TODO: Add pagination support
-    // TODO: Don't use *, return default set of params or params listed in 'fields' param
     this.ctx.pg.query(`SELECT ${fields}
       FROM ${this.tableName}
     `, (error, result) => {
@@ -16,8 +15,7 @@ export default class PublicModel extends ModelBase {
       resolve(result.rows)
     })
   }
-  get (resolve, reject, params, whereParams, fields) {
-    // TODO: Don't use *, return default set of params or params listed in 'fields' param
+  get (resolve, reject, paramKeys, paramValues, whereParams, fields) {
     this.ctx.pg.query(`SELECT ${fields}
       FROM ${this.tableName}
       WHERE ${whereParams.name}=$1
@@ -31,8 +29,7 @@ export default class PublicModel extends ModelBase {
       resolve(result.rows[0])
     })
   }
-  delete (resolve, reject, params, whereParams, fields) {
-    // TODO: Don't use *, return default set of params or params listed in 'fields' param
+  delete (resolve, reject, paramKeys, paramValues, whereParams, fields) {
     this.ctx.pg.query(`DELETE
       FROM ${this.tableName}
       WHERE ${whereParams.name}=$1
@@ -46,15 +43,11 @@ export default class PublicModel extends ModelBase {
       resolve(new BuildSuccess(`${this.modelName} successfully deleted`, NO_CONTENT))
     })
   }
-  patch (resolve, reject, params, whereParams, fields) {
-    let paramKeys = _.keys(params)
-    let paramValues = _.values(params)
-
+  patch (resolve, reject, paramKeys, paramValues, whereParams, fields) {
     let paramsList = _.map(paramKeys, (key, index) => {
       return `${key}=$${index + 2}`
     }).join(', ')
 
-    // TODO: Don't use *, return default set of params or params listed in 'fields' param
     this.ctx.pg.query(`UPDATE ${this.tableName}
       SET ${paramsList}
       WHERE ${whereParams.name}=$1
@@ -69,15 +62,11 @@ export default class PublicModel extends ModelBase {
       resolve(new BuildSuccess(`${this.modelName} successfully updated`, OK, result.rows[0]))
     })
   }
-  put (resolve, reject, params, whereParams, fields) {
-    let paramKeys = _.keys(params)
-    let paramValues = _.values(params)
-
+  put (resolve, reject, paramKeys, paramValues, whereParams, fields) {
     let paramsList = _.map(paramKeys, (key, index) => {
       return `${key}=$${index + 2}`
     }).join(', ')
 
-    // TODO: Don't use *, return default set of params or params listed in 'fields' param
     this.ctx.pg.query(`UPDATE ${this.tableName}
       SET ${paramsList}
       WHERE ${whereParams.name}=$1
@@ -91,14 +80,10 @@ export default class PublicModel extends ModelBase {
       resolve(new BuildSuccess(`${this.modelName} successfully updated`, OK, result.rows[0]))
     })
   }
-  post (resolve, reject, params, whereParams, fields) {
-    let paramKeys = _.keys(params)
-    let paramValues = _.values(params)
-
+  post (resolve, reject, paramKeys, paramValues, whereParams, fields) {
     let columnNames = paramKeys.join(', ')
     let columnValues = `$${_.map(paramValues, (value, index) => { return index + 1 }).join(', $')}`
 
-    // TODO: Don't use *, return default set of params or params listed in 'fields' param
     this.ctx.pg.query(`INSERT INTO ${this.tableName}(${columnNames})
       VALUES (${columnValues})
       RETURNING ${fields}
