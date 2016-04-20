@@ -97,9 +97,8 @@ export default class ModelBase {
         fields = authorizedFields.join(',')
       }
 
-      // TODO: should this be an UNPROCESSABLE_ENTITY or UNAUTHORIZED error?
       // TODO: Move string to const
-      if (!fields.length) return reject(new BuildError('No allowed fields present', INTERNAL_SERVER_ERROR))
+      if (!fields.length) return reject(new BuildError('Unauthorized to access specified fields', FORBIDDEN))
 
       // Validate request data
       let requestValidationSchema = this.requestSchemas[method]
