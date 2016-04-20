@@ -75,7 +75,7 @@ export default class ModelBase {
       if (!this.authorized(method, USER_LEVEL)) return reject(new BuildError(null, UNAUTHORIZED))
 
       // Validate the fields requested
-      // TODO: Make sure that the fields passed are columns on this model - based on user authentication level?
+      // TODO: This should probably be the opposite - no fields if no authorized fields are found
       let authorizedFields = this.authorizedFields[USER_LEVEL] || this.allFields
 
       if (fields) {
