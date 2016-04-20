@@ -110,32 +110,7 @@ export default class ModelBase {
       }
 
       // Call the method
-      return new Promise((responseResolve, responseReject) => {
-        this[method].call(this, responseResolve, responseReject, paramKeys, paramValues, whereParams, fields)
-      }).then((body) => {
-        // TODO: maybe this should only be in tests?
-        // TODO: Maybe do this async?
-
-        // If we are passed fields, don't bother with response validation for now
-        // TODO: add validation that the fields requested are
-        if (fields) return resolve(body)
-
-        // Validate response data
-        let responseValidationSchema = this.responseSchemas[method]
-        if (responseValidationSchema) {
-          var validate = ajv.compile(responseValidationSchema)
-          var valid = validate(body)
-          if (!valid) {
-            // TODO: save this validation error somewhere so we can fix it?
-            // TODO: should we reject?
-            // TODO: remove this
-            console.log(validate.errors);
-            // return reject(new BuildError('Invalid response format', INTERNAL_SERVER_ERROR, validate.errors, 'message'))
-          }
-        }
-
-        return resolve(body)
-      }).catch(reject)
+      return this[method].call(this, resolve, reject, paramKeys, paramValues, whereParams, fields)
     })
   }
 }

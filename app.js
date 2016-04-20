@@ -21,14 +21,14 @@ const NUMBER_OF_SPACES_PER_TAB = 2
 import Authenticator from './authentication/authentication'
 let auth = new Authenticator()
 
-// prettify response
+// Prettify response
 app.use(async (ctx, next) => {
   await next()
   // If we are returning an object, stringify and prettify the response
   if (_.isObject(ctx.body)) ctx.body = JSON.stringify(ctx.body, null, NUMBER_OF_SPACES_PER_TAB)
 })
 
-// x-response-time
+// X-response-time
 app.use(async (ctx, next) => {
   var start = new Date
   await next()
@@ -36,7 +36,7 @@ app.use(async (ctx, next) => {
   ctx.set('X-Response-Time', ms + 'ms')
 })
 
-// logger
+// Logger
 app.use(async (ctx, next) => {
   var start = new Date
   await next()
@@ -44,15 +44,20 @@ app.use(async (ctx, next) => {
   console.log('%s %s - %s', ctx.method, ctx.url, ms)
 })
 
-// response
+// Response
 app.use(async (ctx, next) => {
   try {
     await next()
   } catch (err) {
+    if (!err) err = {}
+
     let errorCode = err.status || INTERNAL_SERVER_ERROR
+
     // TODO: Add description in response to help determine issue
     ctx.body = Object.assign({ status: errorCode }, _.pick(err, ['message', 'errors', 'description']))
     ctx.status = errorCode
+
+    // TODO: Add default message?
 
     // TODO: Make methods of these checks
     // TODO: Make prettier
@@ -60,6 +65,7 @@ app.use(async (ctx, next) => {
   }
 })
 
+// Strip params from the body
 import koaBody from 'koa-body'
 app.use(koaBody({
   formidable: {
@@ -67,8 +73,10 @@ app.use(koaBody({
   }
 }))
 
+// Authenticate user
 app.use(async(ctx, next) => {
-  console.log('user', auth.user(ctx))
+  await auth.authenticateUser(ctx)
+  // TODO: If private, reject here
   await next()
 })
 

@@ -2,6 +2,8 @@ import _ from 'lodash'
 
 import { AUTHORIZATION } from '../requests/headers'
 
+import BuildError, { BAD_REQUEST } from '../responses/error'
+
 export const OWNERS = 'owners'
 export const MANAGERS = 'managers'
 export const CONNECTIONS = 'connections'
@@ -17,21 +19,26 @@ export default class Authenticator {
     // Extend default options
     this.options = Object.assign({}, DEFAULT_OPTIONS, options)
   }
-  user (ctx) {
-    var bearerToken = ctx.get(AUTHORIZATION)
+  authenticateUser (ctx) {
+    return new Promise((resolve, reject) => {
+      var bearerToken = ctx.get(AUTHORIZATION) || ''
+      // If no token passed, this is a public request
+      if (!bearerToken.length) return resolve()
 
-    if (!_.isString(bearerToken) ||
-      bearerToken.substr(0, BEARER_BEGINNING_LENGTH) !== BEARER_BEGINNING
-    ) {
-      return
-    }
+      let bearerTokenBeginning = bearerToken.substr(0, BEARER_BEGINNING_LENGTH)
+      let accessToken = bearerToken.substr(0, BEARER_BEGINNING_LENGTH).trim()
 
-    let accessToken = bearerToken.substr(BEARER_BEGINNING_LENGTH).trim()
-    console.log('accessToken', accessToken);
+      if (!accessToken.length || bearerTokenBeginning !== BEARER_BEGINNING) {
+        return reject(new BuildError('Invalid Authorization header', BAD_REQUEST))
+      }
 
-    // TODO: find user using accessToken
-    let user = 'jim'
-    ctx.user = user
-    return user
+      console.log('accessToken', accessToken);
+
+      // TODO: find user using accessToken
+      let user = 'jim'
+      ctx.user = user
+
+      return resolve(user)
+    })
   }
 }
