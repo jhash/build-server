@@ -98,7 +98,7 @@ export default class ModelBase {
       }
 
       // TODO: Move string to const
-      if (!fields.length) return reject(new BuildError('Unauthorized to access specified fields', FORBIDDEN))
+      if (!fields.length) return reject(new BuildError('No allowed fields present', FORBIDDEN))
 
       // Validate request data
       let requestValidationSchema = this.requestSchemas[method]
