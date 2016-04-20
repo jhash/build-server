@@ -20,8 +20,6 @@ export default class PublicModel extends ModelBase {
     })
   }
   get (resolve, reject, params, whereParams, fields = DEFAULT_PARAMS) {
-    if (_.isUndefined(whereParams.value) || _.isUndefined(whereParams.name)) return reject(new BuildError('Invalid parameters', UNPROCESSABLE_ENTITY))
-
     // TODO: Don't use *, return default set of params or params listed in 'fields' param
     this.ctx.pg.query(`SELECT ${fields}
       FROM ${this.tableName}
@@ -37,8 +35,6 @@ export default class PublicModel extends ModelBase {
     })
   }
   delete (resolve, reject, params, whereParams, fields = DEFAULT_PARAMS) {
-    if (_.isUndefined(whereParams.value) || _.isUndefined(whereParams.name)) return reject(new BuildError('Invalid parameters', UNPROCESSABLE_ENTITY))
-
     // TODO: Don't use *, return default set of params or params listed in 'fields' param
     this.ctx.pg.query(`DELETE
       FROM ${this.tableName}
@@ -55,9 +51,6 @@ export default class PublicModel extends ModelBase {
   }
   patch (resolve, reject, params, whereParams, fields = DEFAULT_PARAMS) {
     let paramKeys = _.keys(params)
-
-    if (_.isUndefined(whereParams.value) || _.isUndefined(whereParams.name) || !paramKeys.length) return reject(new BuildError('Invalid parameters', UNPROCESSABLE_ENTITY))
-
     let paramValues = _.values(params)
 
     let paramsList = _.map(paramKeys, (key, index) => {
@@ -81,10 +74,6 @@ export default class PublicModel extends ModelBase {
   }
   put (resolve, reject, params, whereParams, fields = DEFAULT_PARAMS) {
     let paramKeys = _.keys(params)
-
-    // TODO: Make sure the entire set of required fields is included
-    if (_.isUndefined(whereParams.value) || _.isUndefined(whereParams.name) || !paramKeys.length) return reject(new BuildError('Invalid parameters', UNPROCESSABLE_ENTITY))
-
     let paramValues = _.values(params)
 
     let paramsList = _.map(paramKeys, (key, index) => {
@@ -107,10 +96,6 @@ export default class PublicModel extends ModelBase {
   }
   post (resolve, reject, params, whereParams, fields = DEFAULT_PARAMS) {
     let paramKeys = _.keys(params)
-
-    // TODO: Make sure the entire set of required fields is included
-    if (!paramKeys.length) return reject(new BuildError('Invalid parameters', UNPROCESSABLE_ENTITY))
-
     let paramValues = _.values(params)
 
     let columnNames = paramKeys.join(', ')

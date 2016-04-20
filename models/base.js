@@ -44,22 +44,24 @@ export default class ModelBase {
     // TODO: implement auth and use level here
     const USER_LEVEL = 'public'
 
-    // Find a matching method to call
-    if (!subPaths.length) {
-      method = REQUEST_MAP[ctx.method]
-    } else {
-      method = REQUEST_MAP_WITH_ID[ctx.method]
-
-      // Add slug or ID to params
-      // TODO: add constraint that slug cannot just be a number
-      const slugOrID = _.toNumber(subPaths[0]) == subPaths[0] ? 'id' : 'slug'
-      Object.assign(whereParams, {
-        name: slugOrID,
-        value: subPaths[0]
-      })
-    }
-
     return new Promise((resolve, reject) => {
+      // Find a matching method to call
+      if (!subPaths.length) {
+        method = REQUEST_MAP[ctx.method]
+      } else {
+        if (!subPaths[0].length) return reject(new BuildError('Invalid parameters', UNPROCESSABLE_ENTITY))
+
+        method = REQUEST_MAP_WITH_ID[ctx.method]
+
+        // Add slug or ID to params
+        // TODO: add constraint that slug cannot just be a number
+        const slugOrID = _.toNumber(subPaths[0]) == subPaths[0] ? 'id' : 'slug'
+        Object.assign(whereParams, {
+          name: slugOrID,
+          value: subPaths[0]
+        })
+      }
+
       // TODO: determine if this is the right error or not
       // Return not found error
       if (!method || !_.isFunction(this[method])) return reject(new BuildError(null, NOT_FOUND))
@@ -87,7 +89,7 @@ export default class ModelBase {
         fields = (this.authorizedFields[USER_LEVEL] || this.allFields).join(',')
       }
 
-      // TODO: should this be an UNPROCESSABLE_ENTITY error?
+      // TODO: should this be an UNPROCESSABLE_ENTITY or UNAUTHORIZED error?
       if (!fields.length) return reject(new BuildError('No allowed fields present', INTERNAL_SERVER_ERROR))
 
       // Validate request data
