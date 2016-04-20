@@ -3,7 +3,7 @@ import _ from 'lodash'
 import PublicModel from '../public'
 
 import { POST, PUT, PATCH, GET, INDEX, DELETE } from '../../requests/types'
-import { OWNER, ADMIN, CONNECTED, PRIVATE, PUBLIC } from '../../authentication/authentication'
+import { OWNERS, MANAGERS, CONNECTIONS, PRIVATE, PUBLIC } from '../../authentication/authentication'
 
 const MODEL_NAME = 'User'
 const MODEL_NAME_PLURAL = 'Users'
@@ -24,7 +24,7 @@ const ID = 'id'
 
 // User fields
 const ALL_FIELDS = [FIRST_NAME, LAST_NAME, SLUG, EMAIL, ID]
-const CONNECTED_FIELDS = [FIRST_NAME, LAST_NAME, SLUG, ID]
+const CONNECTIONS_FIELDS = [FIRST_NAME, LAST_NAME, SLUG, ID]
 const PRIVATE_FIELDS = [FIRST_NAME, LAST_NAME, SLUG, ID]
 const PUBLIC_FIELDS = [ID, SLUG]
 
@@ -105,9 +105,9 @@ export default class Users extends PublicModel {
   }
   get authorizedFields () {
     return {
-      [OWNER]: ALL_FIELDS,
-      [ADMIN]: ALL_FIELDS,
-      [CONNECTED]: CONNECTED_FIELDS,
+      [OWNERS]: ALL_FIELDS,
+      [MANAGERS]: ALL_FIELDS,
+      [CONNECTIONS]: CONNECTIONS_FIELDS,
       [PRIVATE]: PRIVATE_FIELDS,
       [PUBLIC]: PUBLIC_FIELDS
     }
@@ -117,7 +117,7 @@ export default class Users extends PublicModel {
   }
   get methodRestrictions () {
     return {
-      [CONNECTED]: {
+      [CONNECTIONS]: {
         [PUT]: true,
         [PATCH]: true
       },

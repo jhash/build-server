@@ -2,9 +2,9 @@ import _ from 'lodash'
 
 import { AUTHORIZATION } from '../requests/headers'
 
-export const OWNER = 'owner'
-export const ADMIN = 'administrator'
-export const CONNECTED = 'connected'
+export const OWNERS = 'owners'
+export const MANAGERS = 'managers'
+export const CONNECTIONS = 'connections'
 export const PRIVATE = 'private'
 export const PUBLIC = 'public'
 
