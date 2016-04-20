@@ -23,7 +23,7 @@ export default class ModelBase {
   get methodRestrictions () {
     return {}
   }
-  authenticated (method, userLevel) {
+  authorized (method, userLevel) {
     let restrictions = this.methodRestrictions[userLevel]
     if (restrictions && restrictions[method]) return false
     return true
@@ -72,7 +72,7 @@ export default class ModelBase {
 
       // Authenticate this user's ability to call this method
       // TODO: pass more things to this?
-      if (!this.authenticated(method, USER_LEVEL)) return reject(new BuildError(null, UNAUTHORIZED))
+      if (!this.authorized(method, USER_LEVEL)) return reject(new BuildError(null, UNAUTHORIZED))
 
       // Validate the fields requested
       // TODO: Make sure that the fields passed are columns on this model - based on user authentication level?
