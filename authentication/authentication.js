@@ -2,7 +2,7 @@ import _ from 'lodash'
 
 import { AUTHORIZATION } from '../requests/headers'
 
-import BuildError, { BAD_REQUEST } from '../responses/error'
+import BuildError, { BAD_REQUEST, UNAUTHORIZED } from '../responses/error'
 
 export const OWNERS = 'owners'
 export const MANAGERS = 'managers'
@@ -26,19 +26,29 @@ export default class Authenticator {
       if (!bearerToken.length) return resolve()
 
       let bearerTokenBeginning = bearerToken.substr(0, BEARER_BEGINNING_LENGTH)
-      let accessToken = bearerToken.substr(0, BEARER_BEGINNING_LENGTH).trim()
+      let accessToken = bearerToken.substr(BEARER_BEGINNING_LENGTH).trim()
 
       if (!accessToken.length || bearerTokenBeginning !== BEARER_BEGINNING) {
         return reject(new BuildError('Invalid Authorization header', BAD_REQUEST))
       }
 
-      console.log('accessToken', accessToken);
+      ctx.pg.query(`SELECT users_id, valid
+        FROM users_access_tokens
+        WHERE access_token=$1
+        LIMIT 1
+      `, [
+        accessToken
+      ], (error, result) => {
+        if (error) return reject(error)
 
-      // TODO: find user using accessToken
-      let user = 'jim'
-      ctx.user = user
+        if (!result.rows.length) return reject(new BuildError('Invalid access token', UNAUTHORIZED))
+        if (!result.rows[0].valid) return reject(new BuildError('Access token expired', UNAUTHORIZED))
 
-      return resolve(user)
+        ctx.user = _.mapKeys(_.pick(result.rows[0], 'users_id'), _.constant('id'))
+
+        // Resolve
+        resolve()
+      })
     })
   }
 }
