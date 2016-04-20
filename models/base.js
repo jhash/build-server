@@ -49,6 +49,7 @@ export default class ModelBase {
       if (!subPaths.length) {
         method = REQUEST_MAP[ctx.method]
       } else {
+        // TODO: Move string to const
         if (!subPaths[0].length) return reject(new BuildError('Invalid parameters', UNPROCESSABLE_ENTITY))
 
         method = REQUEST_MAP_WITH_ID[ctx.method]
@@ -72,8 +73,11 @@ export default class ModelBase {
 
       // Validate the fields requested
       // TODO: Make sure that the fields passed are columns on this model - based on user authentication level?
+      let authorizedFields = this.authorizedFields[USER_LEVEL] || this.allFields
+
       if (fields) {
         // If fields is not a string or there is a * anywhere in it, reject
+        // TODO: Move string to const
         if (!_.isString(fields) || fields.indexOf('*') !== -1) return reject(new BuildError('Invalid fields requested', UNPROCESSABLE_ENTITY))
 
         // Remove white space in fields
@@ -84,12 +88,14 @@ export default class ModelBase {
 
         // This actually takes care of SQL injection on the fields parameter
         // TODO: Specify which fields are unauthorized in error
-        if (!_.isEqual(splitFields, _.intersection(splitFields, this.authorizedFields[USER_LEVEL] || this.allFields))) return reject(new BuildError('Unauthorized to access specified fields', FORBIDDEN))
+        // TODO: Move string to const
+        if (!_.isEqual(splitFields, _.intersection(splitFields, authorizedFields))) return reject(new BuildError('Unauthorized to access specified fields', FORBIDDEN))
       } else {
-        fields = (this.authorizedFields[USER_LEVEL] || this.allFields).join(',')
+        fields = authorizedFields.join(',')
       }
 
       // TODO: should this be an UNPROCESSABLE_ENTITY or UNAUTHORIZED error?
+      // TODO: Move string to const
       if (!fields.length) return reject(new BuildError('No allowed fields present', INTERNAL_SERVER_ERROR))
 
       // Validate request data
@@ -97,6 +103,7 @@ export default class ModelBase {
       if (requestValidationSchema) {
         var validate = ajv.compile(requestValidationSchema)
         var valid = validate(params)
+        // TODO: Move string to const
         if (!valid) return reject(new BuildError('Invalid parameters', UNPROCESSABLE_ENTITY, _.map(validate.errors, 'message')))
       }
 
