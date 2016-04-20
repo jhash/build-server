@@ -12,6 +12,8 @@ export default class PublicModel extends ModelBase {
       FROM ${this.tableName}
     `, (error, result) => {
       if (error) return reject(error)
+
+      // Resolve with result
       resolve(result.rows)
     })
   }
@@ -26,6 +28,8 @@ export default class PublicModel extends ModelBase {
       if (error) return reject(error)
       // TODO: This is bad for security - someone can tell if this model exists or not
       if (!result.rows.length) return reject(new BuildError(`${this.modelName} not found`, NOT_FOUND))
+
+      // Resolve with result
       resolve(result.rows[0])
     })
   }
@@ -40,6 +44,8 @@ export default class PublicModel extends ModelBase {
       if (error) return reject(error)
       // TODO: This is bad for security - someone can tell if this model exists or not
       if (!result.rows.length) return reject(new BuildError(`${this.modelName} not found`, NOT_FOUND))
+
+      // Return success with proper code and result
       resolve(new BuildSuccess(`${this.modelName} successfully deleted`, NO_CONTENT))
     })
   }
@@ -59,6 +65,8 @@ export default class PublicModel extends ModelBase {
       if (error) return reject(error)
       // TODO: This is bad for security - someone can tell if this model exists or not
       if (!result.rows.length) return reject(new BuildError(`${this.modelName} not found`, NOT_FOUND))
+
+      // Return success with proper code and result
       resolve(new BuildSuccess(`${this.modelName} successfully updated`, OK, result.rows[0]))
     })
   }
@@ -77,6 +85,8 @@ export default class PublicModel extends ModelBase {
       if (error) return reject(error)
       // TODO: This is bad for security - someone can tell if this model exists or not
       if (!result.rows.length) return reject(new BuildError(`${this.modelName} not found`, NOT_FOUND))
+
+      // Return success with proper code and result
       resolve(new BuildSuccess(`${this.modelName} successfully updated`, OK, result.rows[0]))
     })
   }
@@ -91,6 +101,8 @@ export default class PublicModel extends ModelBase {
       if (error) return reject(error)
       // Make sure that a model was actually created
       if (!result.rows.length) return reject(new BuildError(`Failed to create ${this.modelName}`))
+
+      // Return success with proper code and result
       resolve(new BuildSuccess(`${this.modelName} successfully added`, CREATED, result.rows[0]))
     })
   }
