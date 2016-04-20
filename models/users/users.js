@@ -119,15 +119,18 @@ export default class Users extends PublicModel {
     return {
       [CONNECTIONS]: {
         [PUT]: true,
-        [PATCH]: true
+        [PATCH]: true,
+        [DELETE]: true
       },
       [PRIVATE]: {
         [PUT]: true,
-        [PATCH]: true
+        [PATCH]: true,
+        [DELETE]: true
       },
       [PUBLIC]: {
         [PUT]: true,
-        [PATCH]: true
+        [PATCH]: true,
+        [DELETE]: true
       }
     }
   }
