@@ -1,24 +1,27 @@
+import _ from 'lodash'
 import Koa from 'koa'
-const app = new Koa()
-
-const APP_NAME = 'build'
-const PORT_NUMBER = 3000
-app.name = APP_NAME
-
 import pg from 'pg'
-const pgURL = 'postgres://jhash:@localhost/build'
-app.context.pg = new pg.Client(pgURL)
 
 import BuildError, { NOT_FOUND, INTERNAL_SERVER_ERROR } from './responses/error'
 import BuildSuccess, { OK } from './responses/success'
 
-import Users from './models/users/users'
-const userController = new Users(app)
+import Authenticator from './authentication/authentication'
 
-import _ from 'lodash'
+import Users from './models/users/users'
+
+const app = new Koa()
+
+const APP_NAME = 'build'
+const PORT_NUMBER = 3000
+
+const pgURL = 'postgres://jhash:@localhost/build'
+
+const userController = new Users(app)
 const NUMBER_OF_SPACES_PER_TAB = 2
 
-import Authenticator from './authentication/authentication'
+app.name = APP_NAME
+app.context.pg = new pg.Client(pgURL)
+
 let auth = new Authenticator()
 
 // Prettify response
