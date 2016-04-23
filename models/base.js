@@ -29,7 +29,7 @@ export default class ModelBase {
     return new Promise((levelResolve) => {
       ctx.pg.query(`SELECT id
         FROM ${this.tableName}_${userLevel}
-        WHERE ${this.tableName}_${whereParams.name}=$1, ${userLevel}_id=$2
+        WHERE ${this.tableName}_${whereParams.name}=$1 AND ${userLevel}_id=$2
         LIMIT 1
       `, [
         whereParams.value,
@@ -44,12 +44,20 @@ export default class ModelBase {
   }
   async checkUserLevels (ctx, whereParams) {
     return new Promise(async (resolve) => {
-      let userLevels = ['owners', 'managers', 'connections']
-      let level = ctx.user ? await this.checkUserLevel(ctx, whereParams, 'owners') : 'public'
-      if (!level) level = await this.checkUserLevel(ctx, whereParams, 'managers')
-      if (!level) level = await this.checkUserLevel(ctx, whereParams, 'connections')
-      if (!level) level = 'private'
-      return resolve(level)
+      if (!ctx.user) return resolve('public')
+
+      const POSSIBLE_USER_LEVELS = ['owners', 'managers', 'connections']
+
+      if (whereParams) {
+        let level
+        for (let index in POSSIBLE_USER_LEVELS) {
+          console.log(POSSIBLE_USER_LEVELS[index]);
+          level = await this.checkUserLevel(ctx, whereParams, POSSIBLE_USER_LEVELS[index])
+          if (level) return resolve(level)
+        }
+      }
+
+      return resolve('private')
     })
   }
   async methodAuthorized (ctx, method, whereParams) {
