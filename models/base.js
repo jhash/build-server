@@ -51,7 +51,6 @@ export default class ModelBase {
       if (whereParams) {
         let level
         for (let index in POSSIBLE_USER_LEVELS) {
-          console.log(POSSIBLE_USER_LEVELS[index]);
           level = await this.checkUserLevel(ctx, whereParams, POSSIBLE_USER_LEVELS[index])
           if (level) return resolve(level)
         }
