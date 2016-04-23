@@ -6,9 +6,9 @@ import BuildError, { NOT_FOUND, UNPROCESSABLE_ENTITY } from '../responses/error'
 import BuildSuccess, { OK, CREATED, NO_CONTENT } from '../responses/success'
 
 export default class PublicModel extends ModelBase {
-  index (resolve, reject, paramKeys, paramValues, whereParams, fields) {
+  index (ctx, resolve, reject, paramKeys, paramValues, whereParams, fields) {
     // TODO: Add pagination support
-    this.ctx.pg.query(`SELECT ${fields}
+    ctx.pg.query(`SELECT ${fields}
       FROM ${this.tableName}
     `, (error, result) => {
       if (error) return reject(error)
@@ -17,8 +17,8 @@ export default class PublicModel extends ModelBase {
       resolve(result.rows)
     })
   }
-  get (resolve, reject, paramKeys, paramValues, whereParams, fields) {
-    this.ctx.pg.query(`SELECT ${fields}
+  get (ctx, resolve, reject, paramKeys, paramValues, whereParams, fields) {
+    ctx.pg.query(`SELECT ${fields}
       FROM ${this.tableName}
       WHERE ${whereParams.name}=$1
       LIMIT 1
@@ -33,8 +33,8 @@ export default class PublicModel extends ModelBase {
       resolve(result.rows[0])
     })
   }
-  delete (resolve, reject, paramKeys, paramValues, whereParams, fields) {
-    this.ctx.pg.query(`DELETE
+  delete (ctx, resolve, reject, paramKeys, paramValues, whereParams, fields) {
+    ctx.pg.query(`DELETE
       FROM ${this.tableName}
       WHERE ${whereParams.name}=$1
       RETURNING ${fields}
@@ -49,12 +49,12 @@ export default class PublicModel extends ModelBase {
       resolve(new BuildSuccess(`${this.modelName} successfully deleted`, NO_CONTENT))
     })
   }
-  patch (resolve, reject, paramKeys, paramValues, whereParams, fields) {
+  patch (ctx, resolve, reject, paramKeys, paramValues, whereParams, fields) {
     let paramsList = _.map(paramKeys, (key, index) => {
       return `${key}=$${index + 2}`
     }).join(', ')
 
-    this.ctx.pg.query(`UPDATE ${this.tableName}
+    ctx.pg.query(`UPDATE ${this.tableName}
       SET ${paramsList}
       WHERE ${whereParams.name}=$1
       RETURNING ${fields}
@@ -70,12 +70,12 @@ export default class PublicModel extends ModelBase {
       resolve(new BuildSuccess(`${this.modelName} successfully updated`, OK, result.rows[0]))
     })
   }
-  put (resolve, reject, paramKeys, paramValues, whereParams, fields) {
+  put (ctx, resolve, reject, paramKeys, paramValues, whereParams, fields) {
     let paramsList = _.map(paramKeys, (key, index) => {
       return `${key}=$${index + 2}`
     }).join(', ')
 
-    this.ctx.pg.query(`UPDATE ${this.tableName}
+    ctx.pg.query(`UPDATE ${this.tableName}
       SET ${paramsList}
       WHERE ${whereParams.name}=$1
       RETURNING ${fields}
@@ -90,11 +90,11 @@ export default class PublicModel extends ModelBase {
       resolve(new BuildSuccess(`${this.modelName} successfully updated`, OK, result.rows[0]))
     })
   }
-  post (resolve, reject, paramKeys, paramValues, whereParams, fields) {
+  post (ctx, resolve, reject, paramKeys, paramValues, whereParams, fields) {
     let columnNames = paramKeys.join(', ')
     let columnValues = `$${_.map(paramValues, (value, index) => { return index + 1 }).join(', $')}`
 
-    this.ctx.pg.query(`INSERT INTO ${this.tableName}(${columnNames})
+    ctx.pg.query(`INSERT INTO ${this.tableName}(${columnNames})
       VALUES (${columnValues})
       RETURNING ${fields}
     `, paramValues, (error, result) => {

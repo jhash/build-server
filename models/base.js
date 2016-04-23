@@ -2,6 +2,7 @@ import _ from 'lodash'
 
 import BuildError, { FORBIDDEN, NOT_FOUND, UNPROCESSABLE_ENTITY, UNAUTHORIZED, INTERNAL_SERVER_ERROR } from '../responses/error'
 
+// TODO: put on app context?
 import Ajv from 'ajv'
 let ajv = Ajv()
 
@@ -20,19 +21,12 @@ export default class ModelBase {
   get allFields () {
     return []
   }
-  get allowedMethods () {
+  get authorizedMethods () {
     // TODO: Allow owners to do everything by default?
     return {}
   }
-  authorized (method, userLevel) {
-    let allowedMethods = this.allowedMethods[userLevel]
-    if (!allowedMethods || !allowedMethods[method]) return false
-    return true
-  }
   async run (subPaths, ctx, next) {
-    this.ctx = ctx
-
-    var params = this.ctx.request.body
+    var params = ctx.request.body
     var whereParams = {}
     var method
 
@@ -44,9 +38,6 @@ export default class ModelBase {
 
     let paramKeys = _.keys(params)
     let paramValues = _.values(params)
-
-    // TODO: implement auth and use level here
-    const USER_LEVEL = 'public'
 
     return new Promise((resolve, reject) => {
       // Find a matching method to call
@@ -73,10 +64,10 @@ export default class ModelBase {
 
       // Authenticate this user's ability to call this method
       // TODO: pass more things to this?
-      if (!this.authorized(method, USER_LEVEL)) return reject(new BuildError(null, UNAUTHORIZED))
+      if (!ctx.authorizer.methodAuthorized(ctx, method, this.authorizedMethods)) return reject(new BuildError(null, UNAUTHORIZED))
 
       // Validate the fields requested
-      let authorizedFields = this.authorizedFields[USER_LEVEL] || []
+      let authorizedFields = this.authorizedFields[ctx.userLevel] || []
 
       if (fields) {
         // If fields is not a string or there is a * anywhere in it, reject
@@ -110,7 +101,7 @@ export default class ModelBase {
       }
 
       // Call the method
-      return this[method].call(this, resolve, reject, paramKeys, paramValues, whereParams, fields)
+      return this[method].call(this, ctx, resolve, reject, paramKeys, paramValues, whereParams, fields)
     })
   }
 }

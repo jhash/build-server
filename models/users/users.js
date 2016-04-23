@@ -3,7 +3,7 @@ import _ from 'lodash'
 import PublicModel from '../public'
 
 import { POST, PUT, PATCH, GET, INDEX, DELETE } from '../../requests/types'
-import { OWNERS, MANAGERS, CONNECTIONS, PRIVATE, PUBLIC } from '../../authentication/authentication'
+import { OWNERS, MANAGERS, CONNECTIONS, PRIVATE, PUBLIC } from '../../auth/authorization'
 
 const MODEL_NAME = 'User'
 const MODEL_NAME_PLURAL = 'Users'
@@ -115,7 +115,7 @@ export default class Users extends PublicModel {
   get allFields () {
     return ALL_FIELDS
   }
-  get allowedMethods () {
+  get authorizedMethods () {
     return {
       [OWNERS]: {
         [PUT]: true,

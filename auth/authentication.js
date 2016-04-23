@@ -4,12 +4,6 @@ import { AUTHORIZATION } from '../requests/headers'
 
 import BuildError, { BAD_REQUEST, UNAUTHORIZED } from '../responses/error'
 
-export const OWNERS = 'owners'
-export const MANAGERS = 'managers'
-export const CONNECTIONS = 'connections'
-export const PRIVATE = 'private'
-export const PUBLIC = 'public'
-
 const DEFAULT_OPTIONS = {}
 const BEARER_BEGINNING = 'Bearer '
 const BEARER_BEGINNING_LENGTH = BEARER_BEGINNING.length

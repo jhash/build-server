@@ -5,7 +5,8 @@ import pg from 'pg'
 import BuildError, { NOT_FOUND, INTERNAL_SERVER_ERROR } from './responses/error'
 import BuildSuccess, { OK } from './responses/success'
 
-import Authenticator from './authentication/authentication'
+import Authenticator from './auth/authentication'
+import Authorizer from './auth/authorization'
 
 import Users from './models/users/users'
 
@@ -21,8 +22,9 @@ const NUMBER_OF_SPACES_PER_TAB = 2
 
 app.name = APP_NAME
 app.context.pg = new pg.Client(pgURL)
+app.context.authenticator = new Authenticator()
+app.context.authorizer = new Authorizer()
 
-let auth = new Authenticator()
 
 // Prettify response
 app.use(async (ctx, next) => {
@@ -69,6 +71,7 @@ app.use(async (ctx, next) => {
 })
 
 // Strip params from the body
+// TODO: build/find non-generator version of this
 import koaBody from 'koa-body'
 app.use(koaBody({
   formidable: {
@@ -78,7 +81,7 @@ app.use(koaBody({
 
 // Authenticate user
 app.use(async(ctx, next) => {
-  await auth.authenticateUser(ctx)
+  await ctx.authenticator.authenticateUser(ctx)
   // TODO: If private, reject here
   await next()
 })
