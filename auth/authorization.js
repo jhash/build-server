@@ -13,7 +13,7 @@ export default class Authorizer {
     // Extend default options
     this.options = Object.assign({}, DEFAULT_OPTIONS, options)
   }
-  methodAuthorized (ctx, method, allowedMethods) {
+  async methodAuthorized (ctx, method, allowedMethods, modelName) {
     // TODO: Find the user's actual connection to the requested model - need to pass model?
     ctx.userLevel = 'public'
     let methods = allowedMethods[ctx.userLevel]

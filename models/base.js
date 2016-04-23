@@ -25,21 +25,59 @@ export default class ModelBase {
     // TODO: Allow owners to do everything by default?
     return {}
   }
+  async checkUserLevel (ctx, whereParams, userLevel) {
+    return new Promise((levelResolve) => {
+      ctx.pg.query(`SELECT id
+        FROM ${this.tableName}_${userLevel}
+        WHERE ${this.tableName}_${whereParams.name}=$1, ${userLevel}_id=$2
+        LIMIT 1
+      `, [
+        whereParams.value,
+        ctx.user.id
+      ], (error, result) => {
+        if (error || !result.rows.length) return levelResolve()
+
+        // Resolve with result
+        return levelResolve(userLevel)
+      })
+    })
+  }
+  async checkUserLevels (ctx, whereParams) {
+    return new Promise(async (resolve) => {
+      let userLevels = ['owners', 'managers', 'connections']
+      let level = ctx.user ? await this.checkUserLevel(ctx, whereParams, 'owners') : 'public'
+      if (!level) level = await this.checkUserLevel(ctx, whereParams, 'managers')
+      if (!level) level = await this.checkUserLevel(ctx, whereParams, 'connections')
+      if (!level) level = 'private'
+      return resolve(level)
+    })
+  }
+  async methodAuthorized (ctx, method, whereParams) {
+    return new Promise(async (resolve) => {
+      ctx.userLevel = await this.checkUserLevels(ctx, whereParams)
+
+      console.log('level', ctx.userLevel);
+
+      let methods = this.authorizedMethods[ctx.userLevel]
+      if (!methods || !methods[method]) return resolve(false)
+      return resolve(true)
+    })
+  }
   async run (subPaths, ctx, next) {
-    var params = ctx.request.body
-    var whereParams = {}
-    var method
+    return new Promise(async (resolve, reject) => {
+      var params = ctx.request.body
+      var whereParams = {}
+      var method
 
-    var fields
-    if (params && params.fields) {
-      fields = params.fields
-      params = _.omit(params, 'fields')
-    }
+      var fields
+      if (params && params.fields) {
+        fields = params.fields
+        params = _.omit(params, 'fields')
+      }
 
-    let paramKeys = _.keys(params)
-    let paramValues = _.values(params)
+      let paramKeys = _.keys(params)
+      let paramValues = _.values(params)
 
-    return new Promise((resolve, reject) => {
       // Find a matching method to call
       if (!subPaths.length) {
         method = REQUEST_MAP[ctx.method]
@@ -62,9 +100,13 @@ export default class ModelBase {
       // Return not found error
       if (!method || !_.isFunction(this[method])) return reject(new BuildError(null, NOT_FOUND))
 
+      console.log('user', ctx.user);
+      let authorized = await this.methodAuthorized(ctx, method, whereParams)
+      console.log('authorized', authorized);
+
       // Authenticate this user's ability to call this method
       // TODO: pass more things to this?
-      if (!ctx.authorizer.methodAuthorized(ctx, method, this.authorizedMethods)) return reject(new BuildError(null, UNAUTHORIZED))
+      if (!authorized) return reject(new BuildError(null, UNAUTHORIZED))
 
       // Validate the fields requested
       let authorizedFields = this.authorizedFields[ctx.userLevel] || []
