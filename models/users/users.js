@@ -28,6 +28,10 @@ const CONNECTIONS_FIELDS = [FIRST_NAME, LAST_NAME, SLUG, ID]
 const PRIVATE_FIELDS = [FIRST_NAME, LAST_NAME, SLUG, ID]
 const PUBLIC_FIELDS = [ID, SLUG]
 
+// User methods
+const ALL_METHODS = [PUT, GET, POST, PATCH, INDEX, DELETE]
+const VIEW_METHODS = [GET, POST, INDEX]
+
 // Schemas
 
 // POST and PUT Requests
@@ -117,37 +121,11 @@ export default class Users extends PublicModel {
   }
   get authorizedMethods () {
     return {
-      [OWNERS]: {
-        [PUT]: true,
-        [GET]: true,
-        [POST]: true,
-        [PATCH]: true,
-        [INDEX]: true,
-        [DELETE]: true
-      },
-      [MANAGERS]: {
-        [PUT]: true,
-        [GET]: true,
-        [POST]: true,
-        [PATCH]: true,
-        [INDEX]: true,
-        [DELETE]: true
-      },
-      [CONNECTIONS]: {
-        [GET]: true,
-        [POST]: true,
-        [INDEX]: true,
-      },
-      [PRIVATE]: {
-        [GET]: true,
-        [POST]: true,
-        [INDEX]: true
-      },
-      [PUBLIC]: {
-        [GET]: true,
-        [POST]: true,
-        [INDEX]: true
-      }
+      [OWNERS]: ALL_METHODS,
+      [MANAGERS]: ALL_METHODS,
+      [CONNECTIONS]: VIEW_METHODS,
+      [PRIVATE]: VIEW_METHODS,
+      [PUBLIC]: VIEW_METHODS
     }
   }
   get possibleUserLevels () {

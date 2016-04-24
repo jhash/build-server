@@ -66,7 +66,7 @@ export default class ModelBase {
       ctx.userLevel = await this.checkUserLevels(ctx, whereParams)
 
       let methods = this.authorizedMethods[ctx.userLevel]
-      if (!methods || !methods[method]) return resolve(false)
+      if (methods.indexOf(method) === -1) return resolve(false)
       return resolve(true)
     })
   }
