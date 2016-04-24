@@ -7,6 +7,7 @@ import Ajv from 'ajv'
 let ajv = Ajv()
 
 import { REQUEST_MAP, REQUEST_MAP_WITH_ID } from '../requests/types'
+import { PUBLIC, PRIVATE } from '../auth/authorization'
 
 export default class ModelBase {
   get requestSchemas () {
@@ -19,6 +20,9 @@ export default class ModelBase {
     return {}
   }
   get allFields () {
+    return []
+  }
+  get possibleUserLevels () {
     return []
   }
   get authorizedMethods () {
@@ -46,12 +50,10 @@ export default class ModelBase {
     return new Promise(async (resolve) => {
       if (!ctx.user) return resolve('public')
 
-      const POSSIBLE_USER_LEVELS = ['owners', 'managers', 'connections']
-
       if (whereParams) {
         let level
-        for (let index in POSSIBLE_USER_LEVELS) {
-          level = await this.checkUserLevel(ctx, whereParams, POSSIBLE_USER_LEVELS[index])
+        for (let index in this.possibleUserLevels) {
+          level = await this.checkUserLevel(ctx, whereParams, this.possibleUserLevels[index])
           if (level) return resolve(level)
         }
       }
@@ -62,8 +64,6 @@ export default class ModelBase {
   async methodAuthorized (ctx, method, whereParams) {
     return new Promise(async (resolve) => {
       ctx.userLevel = await this.checkUserLevels(ctx, whereParams)
-
-      console.log('level', ctx.userLevel);
 
       let methods = this.authorizedMethods[ctx.userLevel]
       if (!methods || !methods[method]) return resolve(false)
@@ -107,9 +107,7 @@ export default class ModelBase {
       // Return not found error
       if (!method || !_.isFunction(this[method])) return reject(new BuildError(null, NOT_FOUND))
 
-      console.log('user', ctx.user);
       let authorized = await this.methodAuthorized(ctx, method, whereParams)
-      console.log('authorized', authorized);
 
       // Authenticate this user's ability to call this method
       // TODO: pass more things to this?

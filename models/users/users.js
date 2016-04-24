@@ -150,4 +150,7 @@ export default class Users extends PublicModel {
       }
     }
   }
+  get possibleUserLevels () {
+    return [OWNERS, MANAGERS, CONNECTIONS]
+  }
 }
