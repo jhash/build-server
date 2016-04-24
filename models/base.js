@@ -48,7 +48,7 @@ export default class ModelBase {
   }
   async checkUserLevels (ctx, whereParams) {
     return new Promise(async (resolve) => {
-      if (!ctx.user) return resolve('public')
+      if (!ctx.user) return resolve(PUBLIC)
 
       if (whereParams) {
         let level
@@ -58,7 +58,7 @@ export default class ModelBase {
         }
       }
 
-      return resolve('private')
+      return resolve(PRIVATE)
     })
   }
   async methodAuthorized (ctx, method, whereParams) {
