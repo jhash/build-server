@@ -61,14 +61,11 @@ export default class ModelBase {
       return resolve(PRIVATE)
     })
   }
-  async methodAuthorized (ctx, method, whereParams) {
-    return new Promise(async (resolve) => {
-      ctx.userLevel = await this.checkUserLevels(ctx, whereParams)
-
-      let methods = this.authorizedMethods[ctx.userLevel]
-      if (!methods || methods.indexOf(method) === -1) return resolve(false)
-      return resolve(true)
-    })
+  methodAuthorized (ctx, method) {
+    // If this userLevel's has access to the specified method
+    let methods = this.authorizedMethods[ctx.userLevel]
+    if (!methods || methods.indexOf(method) === -1) return false
+    return true
   }
   async run (subPaths, ctx, next) {
     return new Promise(async (resolve, reject) => {
@@ -107,11 +104,11 @@ export default class ModelBase {
       // Return not found error
       if (!method || !_.isFunction(this[method])) return reject(new BuildError(null, NOT_FOUND))
 
-      let authorized = await this.methodAuthorized(ctx, method, whereParams)
+      // Set user level for this model
+      ctx.userLevel = await this.checkUserLevels(ctx, whereParams)
 
-      // Authenticate this user's ability to call this method
-      // TODO: pass more things to this?
-      if (!authorized) return reject(new BuildError(null, UNAUTHORIZED))
+      // Authorize this user's ability to call this method
+      if (!this.methodAuthorized(ctx, method)) return reject(new BuildError(null, UNAUTHORIZED))
 
       // Validate the fields requested
       let authorizedFields = this.authorizedFields[ctx.userLevel] || []
