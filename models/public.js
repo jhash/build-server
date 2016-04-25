@@ -6,10 +6,11 @@ import BuildError, { NOT_FOUND, UNPROCESSABLE_ENTITY } from '../responses/error'
 import BuildSuccess, { OK, CREATED, NO_CONTENT } from '../responses/success'
 
 export default class PublicModel extends ModelBase {
-  index (ctx, resolve, reject, paramKeys, paramValues, whereParams, fields) {
+  index (ctx, resolve, reject, paramKeys, paramValues, whereParams, fields, sort = '') {
     // TODO: Add pagination support
     ctx.pg.query(`SELECT ${fields}
       FROM ${this.tableName}
+      ${sort.length ? 'ORDER BY ' + sort : ''}
     `, (error, result) => {
       if (error) return reject(error)
 

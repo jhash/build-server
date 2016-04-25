@@ -79,17 +79,22 @@ export default class ModelBase {
         params = _.omit(params, 'fields')
       }
 
-      let paramKeys = _.keys(params)
-      let paramValues = _.values(params)
+      var sort
+      if (params && params.sort) {
+        sort = params.sort
+        params = _.omit(params, 'sort')
+      }
+
+      const methodType = params.method ? params.method : ctx.method
 
       // Find a matching method to call
       if (!subPaths.length) {
-        method = REQUEST_MAP[ctx.method]
+        method = REQUEST_MAP[methodType]
       } else {
         // TODO: Move string to const
         if (!subPaths[0].length) return reject(new BuildError('Invalid parameters', UNPROCESSABLE_ENTITY))
 
-        method = REQUEST_MAP_WITH_ID[ctx.method]
+        method = REQUEST_MAP_WITH_ID[methodType]
 
         // Add slug or ID to params
         // TODO: add constraint that slug cannot just be a number
@@ -135,6 +140,24 @@ export default class ModelBase {
       // TODO: Move string to const
       if (!fields.length) return reject(new BuildError('No allowed fields present', FORBIDDEN))
 
+      if (sort) {
+        try {
+          sort = sort.replace(/\s+/g, '').split(',').map((sortField) => {
+            if (!sortField.length) throw new BuildError('Invalid sort parameters', UNPROCESSABLE_ENTITY)
+
+            const descending = sortField[0] === '-'
+            sortField = descending ? sortField.substr(1) : sortField
+
+            // TODO: only sort by authorized fields?
+            if (this.allFields.indexOf(sortField) === -1) throw new BuildError('Unauthorized to sort by specified fields', UNPROCESSABLE_ENTITY)
+
+            return sortField + (descending ? ' DESC' : ' ASC')
+          }).join(', ')
+        } catch (error) {
+          return reject(error)
+        }
+      }
+
       // Validate request data
       let requestValidationSchema = this.requestSchemas[method]
       if (requestValidationSchema) {
@@ -144,8 +167,11 @@ export default class ModelBase {
         if (!valid) return reject(new BuildError('Invalid parameters', UNPROCESSABLE_ENTITY, _.map(validate.errors, 'message')))
       }
 
+      let paramKeys = _.keys(params)
+      let paramValues = _.values(params)
+
       // Call the method
-      return this[method].call(this, ctx, resolve, reject, paramKeys, paramValues, whereParams, fields)
+      return this[method].call(this, ctx, resolve, reject, paramKeys, paramValues, whereParams, fields, sort)
     })
   }
 }
