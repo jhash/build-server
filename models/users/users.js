@@ -1,19 +1,14 @@
 import _ from 'lodash'
 
-import PublicModel from '../public'
+import Model from '../model'
 
 import { POST, PUT, PATCH, GET, INDEX, DELETE } from '../../requests/types'
 import { OWNERS, MANAGERS, CONNECTIONS, PRIVATE, PUBLIC } from '../../auth/authorization'
+import { STRING, NUMBER, OBJECT, ARRAY } from '../field_types'
 
 const MODEL_NAME = 'User'
 const MODEL_NAME_PLURAL = 'Users'
 const TABLE_NAME = 'users'
-
-// Property types
-const STRING = 'string'
-const NUMBER = 'number'
-const OBJECT = 'object'
-const ARRAY = 'array'
 
 // User columns
 const FIRST_NAME = 'first_name'
@@ -84,7 +79,7 @@ const USERS_FULL_RESPONSE_LIST_SCHEMA = {
   items: [USERS_FULL_RESPONSE_SCHEMA]
 }
 
-export default class Users extends PublicModel {
+export default class Users extends Model {
   get modelName () {
     return MODEL_NAME
   }

@@ -95,14 +95,14 @@ app.use(async (ctx) => {
     return index % 2 === 0
   }).join('_')
 
-  let controller = tableControllerMap[tableName].controller
+  let tableController = tableControllerMap[tableName]
 
-  if (!controller || !_.isFunction(controller.run)) throw new BuildError(null, NOT_FOUND)
+  if (!tableController || !tableController.controller || !_.isFunction(tableController.controller.run)) throw new BuildError(null, NOT_FOUND)
 
   // Set default result
   let result = {}
 
-  result = await controller.run.call(controller, urlPaths, ctx)
+  result = await tableController.controller.run.call(tableController.controller, urlPaths, ctx)
 
   ctx.body = result.body || result
   ctx.status = result.status || OK
@@ -119,12 +119,13 @@ app.context.pg.connect(function(err) {
     tableNames = _.map(result.rows, 'table_name')
     _.each(tableNames, (tableName) => {
       try {
-        let controller = require(`./models/${tableName}/${tableName}`)
+        const splitTableName = tableName.split('_')
+        let controller = require(`./models/${tableName.replace(/_+/g, '/')}/${splitTableName[splitTableName.length - 1]}`)
         tableControllerMap[tableName] = {
           controller: new controller.default()
         }
       } catch (e) {
-
+        // console.error(e);
       }
     })
     console.log('All table names', tableNames)

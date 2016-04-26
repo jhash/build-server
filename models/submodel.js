@@ -1,11 +1,11 @@
 import _ from 'lodash'
 
-import ModelBase from './base'
+import Model from './model'
 
 import BuildError, { NOT_FOUND, UNPROCESSABLE_ENTITY } from '../responses/error'
 import BuildSuccess, { OK, CREATED, NO_CONTENT } from '../responses/success'
 
-export default class PublicModel extends ModelBase {
+export default class Submodel extends Model {
   index (ctx, resolve, reject, paramKeys, paramValues, whereParams, fields, sort = '') {
     // TODO: Add pagination support
     ctx.pg.query(`SELECT ${fields}
