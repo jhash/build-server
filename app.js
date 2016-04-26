@@ -17,7 +17,6 @@ const PORT_NUMBER = 3000
 
 const pgURL = 'postgres://jhash:@localhost/build'
 
-const userController = new Users(app)
 const NUMBER_OF_SPACES_PER_TAB = 2
 
 app.name = APP_NAME
@@ -25,6 +24,8 @@ app.context.pg = new pg.Client(pgURL)
 app.context.authenticator = new Authenticator()
 app.context.authorizer = new Authorizer()
 
+let tableNames = []
+let tableControllerMap = {}
 
 // Prettify response
 app.use(async (ctx, next) => {
@@ -87,15 +88,22 @@ app.use(async(ctx, next) => {
 })
 
 app.use(async (ctx) => {
+  // Remove first slash and split on the rest
   let urlPaths = ctx.path.substr(1).split('/')
-  var result = {}
-  switch (urlPaths[0]) {
-    case `${userController.tableName}`:
-      result = await userController.run.call(userController, urlPaths.splice(1), ctx)
-      break
-    default:
-      throw new BuildError(null, NOT_FOUND)
-  }
+
+  const tableName = _.remove(urlPaths, (urlPaths, index) => {
+    return index % 2 === 0
+  }).join('_')
+
+  let controller = tableControllerMap[tableName].controller
+
+  if (!controller || !_.isFunction(controller.run)) throw new BuildError(null, NOT_FOUND)
+
+  // Set default result
+  let result = {}
+
+  result = await controller.run.call(controller, urlPaths, ctx)
+
   ctx.body = result.body || result
   ctx.status = result.status || OK
 })
@@ -108,7 +116,18 @@ app.context.pg.connect(function(err) {
   // TODO: use something like this to build the possible routes?
   app.context.pg.query("SELECT table_name FROM information_schema.tables WHERE table_schema='public' AND table_type='BASE TABLE';", function (err, result) {
     if (err) return console.error('Failed to fetch tables', err)
-    console.log('All table names', _.map(result.rows, 'table_name'))
+    tableNames = _.map(result.rows, 'table_name')
+    _.each(tableNames, (tableName) => {
+      try {
+        let controller = require(`./models/${tableName}/${tableName}`)
+        tableControllerMap[tableName] = {
+          controller: new controller.default()
+        }
+      } catch (e) {
+
+      }
+    })
+    console.log('All table names', tableNames)
   })
 
   // Launch the server

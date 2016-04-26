@@ -67,7 +67,7 @@ export default class ModelBase {
     if (!methods || methods.indexOf(method) === -1) return false
     return true
   }
-  async run (subPaths, ctx, next) {
+  async run (modelIds, ctx, next) {
     return new Promise(async (resolve, reject) => {
       var params = ctx.request.body
       var whereParams = {}
@@ -88,20 +88,20 @@ export default class ModelBase {
       const methodType = params.method ? params.method : ctx.method
 
       // Find a matching method to call
-      if (!subPaths.length) {
+      if (!modelIds.length) {
         method = REQUEST_MAP[methodType]
       } else {
         // TODO: Move string to const
-        if (!subPaths[0].length) return reject(new BuildError('Invalid parameters', UNPROCESSABLE_ENTITY))
+        if (!modelIds[0].length) return reject(new BuildError('Invalid parameters', UNPROCESSABLE_ENTITY))
 
         method = REQUEST_MAP_WITH_ID[methodType]
 
         // Add slug or ID to params
         // TODO: add constraint that slug cannot just be a number
-        const slugOrID = _.toNumber(subPaths[0]) == subPaths[0] ? 'id' : 'slug'
+        const slugOrID = _.toNumber(modelIds[0]) == modelIds[0] ? 'id' : 'slug'
         Object.assign(whereParams, {
           name: slugOrID,
-          value: subPaths[0]
+          value: modelIds[0]
         })
       }
 
