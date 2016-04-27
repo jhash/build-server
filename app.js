@@ -15,17 +15,19 @@ const app = new Koa()
 const APP_NAME = 'build'
 const PORT_NUMBER = 3000
 
-const pgURL = 'postgres://jhash:@localhost/build'
+const POSTGRES_URL = 'postgres://jhash:@localhost/build'
 
 const NUMBER_OF_SPACES_PER_TAB = 2
 
-app.name = APP_NAME
-app.context.pg = new pg.Client(pgURL)
-app.context.authenticator = new Authenticator()
-app.context.authorizer = new Authorizer()
-
 let tableNames = []
 let tableControllerMap = {}
+
+app.name = APP_NAME
+app.context.pg = new pg.Client(POSTGRES_URL)
+app.context.authenticator = new Authenticator()
+// TODO: remove this?
+app.context.authorizer = new Authorizer()
+app.context.tableControllerMap = tableControllerMap
 
 // Prettify response
 app.use(async (ctx, next) => {
@@ -89,20 +91,21 @@ app.use(async(ctx, next) => {
 
 app.use(async (ctx) => {
   // Remove first slash and split on the rest
-  let urlPaths = ctx.path.substr(1).split('/')
-
-  const tableName = _.remove(urlPaths, (urlPaths, index) => {
+  let tableIds = ctx.path.substr(1).split('/')
+  let tableNames = _.remove(tableIds, (tableId, index) => {
     return index % 2 === 0
-  }).join('_')
+  })
 
-  let tableController = tableControllerMap[tableName]
+  const controllerName = tableNames.join('_')
+
+  let tableController = ctx.tableControllerMap[controllerName]
 
   if (!tableController || !tableController.controller || !_.isFunction(tableController.controller.run)) throw new BuildError(null, NOT_FOUND)
 
   // Set default result
   let result = {}
 
-  result = await tableController.controller.run.call(tableController.controller, urlPaths, ctx)
+  result = await tableController.controller.run.call(tableController.controller, ctx, tableIds, tableNames)
 
   ctx.body = result.body || result
   ctx.status = result.status || OK
@@ -129,6 +132,7 @@ app.context.pg.connect(function(err) {
       }
     })
     console.log('All table names', tableNames)
+    console.log('Controllers', tableControllerMap);
   })
 
   // Launch the server

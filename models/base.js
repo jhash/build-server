@@ -29,14 +29,17 @@ export default class ModelBase {
     // TODO: Allow owners to do everything by default?
     return {}
   }
-  async checkUserLevel (ctx, whereParams, userLevel) {
+  async checkUserLevel (ctx, whereParam, userLevel) {
     return new Promise((levelResolve) => {
+      console.log(whereParam, userLevel, ctx.user.id);
+      if (whereParam.name === 'users_id' && userLevel === 'owners' && ctx.user.id == whereParam.value) return levelResolve(userLevel)
+
       ctx.pg.query(`SELECT id
         FROM ${this.tableName}_${userLevel}
-        WHERE ${this.tableName}_${whereParams.name}=$1 AND ${userLevel}_id=$2
+        WHERE ${this.tableName}_${whereParam.name}=$1 AND ${userLevel}_id=$2
         LIMIT 1
       `, [
-        whereParams.value,
+        whereParam.value,
         ctx.user.id
       ], (error, result) => {
         if (error || !result.rows.length) return levelResolve()
@@ -46,14 +49,14 @@ export default class ModelBase {
       })
     })
   }
-  async checkUserLevels (ctx, whereParams) {
+  async checkUserLevels (ctx, whereParam) {
     return new Promise(async (resolve) => {
       if (!ctx.user) return resolve(PUBLIC)
 
-      if (whereParams) {
+      if (whereParam) {
         let level
         for (let index in this.possibleUserLevels) {
-          level = await this.checkUserLevel(ctx, whereParams, this.possibleUserLevels[index])
+          level = await this.checkUserLevel(ctx, whereParam, this.possibleUserLevels[index])
           if (level) return resolve(level)
         }
       }
@@ -67,50 +70,36 @@ export default class ModelBase {
     if (!methods || methods.indexOf(method) === -1) return false
     return true
   }
-  async run (modelIds, ctx, next) {
+  async run (ctx, tableIds, tableNames) {
     return new Promise(async (resolve, reject) => {
-      var params = ctx.request.body
-      var whereParams = {}
-      var method
+      let params = ctx.request.body
 
-      var fields
-      if (params && params.fields) {
-        fields = params.fields
-        params = _.omit(params, 'fields')
-      }
+      let fields = _.get(params, 'fields')
+      let sort = _.get(params, 'sort')
 
-      var sort
-      if (params && params.sort) {
-        sort = params.sort
-        params = _.omit(params, 'sort')
-      }
+      params = _.omit(params, ['fields', 'sort'])
 
+      // TODO: only allow certain method types for certain ctx.methods? (GET or POST)
       const methodType = params.method ? params.method : ctx.method
 
+      // Whether or not this request has an id or slug
+      const requestHasIdOrSlug = tableIds.length === tableNames.length
+
       // Find a matching method to call
-      if (!modelIds.length) {
-        method = REQUEST_MAP[methodType]
-      } else {
-        // TODO: Move string to const
-        if (!modelIds[0].length) return reject(new BuildError('Invalid parameters', UNPROCESSABLE_ENTITY))
+      let method = requestHasIdOrSlug ? REQUEST_MAP_WITH_ID[methodType] : REQUEST_MAP[methodType]
 
-        method = REQUEST_MAP_WITH_ID[methodType]
-
-        // Add slug or ID to params
-        // TODO: add constraint that slug cannot just be a number
-        const slugOrID = _.toNumber(modelIds[0]) == modelIds[0] ? 'id' : 'slug'
-        Object.assign(whereParams, {
-          name: slugOrID,
-          value: modelIds[0]
-        })
-      }
-
-      // TODO: determine if this is the right error or not
       // Return not found error
       if (!method || !_.isFunction(this[method])) return reject(new BuildError(null, NOT_FOUND))
 
+      // Add slugs or IDs to params
+
+      let whereParam = {
+        name: `${tableNames.splice(0, tableNames.length - 1).concat([(_.toNumber(tableIds[0]) == tableIds[0] ? 'id' : 'slug')]).join('_')}`,
+        value: tableIds[0]
+      }
+
       // Set user level for this model
-      ctx.userLevel = await this.checkUserLevels(ctx, whereParams)
+      ctx.userLevel = await this.checkUserLevels(ctx, whereParam)
 
       // Authorize this user's ability to call this method
       if (!this.methodAuthorized(ctx, method)) return reject(new BuildError(null, UNAUTHORIZED))
@@ -171,7 +160,7 @@ export default class ModelBase {
       let paramValues = _.values(params)
 
       // Call the method
-      return this[method].call(this, ctx, resolve, reject, paramKeys, paramValues, whereParams, fields, sort)
+      return this[method].call(this, ctx, resolve, reject, paramKeys, paramValues, whereParam, fields, sort)
     })
   }
 }
