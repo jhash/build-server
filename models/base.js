@@ -31,7 +31,7 @@ export default class ModelBase {
   }
   async checkUserLevel (ctx, whereParam, userLevel) {
     return new Promise((levelResolve) => {
-      console.log(whereParam, userLevel, ctx.user.id);
+      // TODO: clean this
       if (whereParam.name === 'users_id' && userLevel === 'owners' && ctx.user.id == whereParam.value) return levelResolve(userLevel)
 
       ctx.pg.query(`SELECT id
