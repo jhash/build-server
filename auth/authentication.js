@@ -26,9 +26,13 @@ export default class Authenticator {
         return reject(new BuildError('Invalid Authorization header', BAD_REQUEST))
       }
 
-      ctx.pg.query(`SELECT users_id, valid
-        FROM users_access_tokens
-        WHERE access_token=$1
+      ctx.pg.query(`SELECT users.id, users.slug, users_access_tokens.valid
+        FROM users INNER JOIN users_access_tokens ON (users.id = users_access_tokens.users_id)
+        WHERE users.id = (SELECT users_id
+          FROM users_access_tokens
+          WHERE access_token=$1
+          LIMIT 1
+        )
         LIMIT 1
       `, [
         accessToken
@@ -38,7 +42,7 @@ export default class Authenticator {
         if (!result.rows.length) return reject(new BuildError('Invalid access token', UNAUTHORIZED))
         if (!result.rows[0].valid) return reject(new BuildError('Access token expired', UNAUTHORIZED))
 
-        ctx.user = _.mapKeys(_.pick(result.rows[0], 'users_id'), _.constant('id'))
+        ctx.user = result.rows[0]
 
         // Resolve
         resolve()
