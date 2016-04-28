@@ -42,7 +42,7 @@ export default class Authenticator {
         if (!result.rows.length) return reject(new BuildError('Invalid access token', UNAUTHORIZED))
         if (!result.rows[0].valid) return reject(new BuildError('Access token expired', UNAUTHORIZED))
 
-        ctx.user = result.rows[0]
+        ctx.user = _.omit(result.rows[0], 'valid')
 
         // Resolve
         resolve()
