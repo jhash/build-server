@@ -64,13 +64,12 @@ export default class ModelBase {
       return resolve(PRIVATE)
     })
   }
-  methodAuthorized (ctx, method) {
+  methodAuthorized (ctx, method, methods) {
     // If this userLevel's has access to the specified method
-    let methods = this.authorizedMethods[ctx.userLevel]
     if (!methods || methods.indexOf(method) === -1) return false
     return true
   }
-  async run (ctx, tableIds, tableNames) {
+  async run (ctx, whereParam, preAuth) {
     return new Promise(async (resolve, reject) => {
       let params = ctx.request.body
 
@@ -82,30 +81,20 @@ export default class ModelBase {
       // TODO: only allow certain method types for certain ctx.methods? (GET or POST)
       const methodType = params.method ? params.method : ctx.method
 
-      // Whether or not this request has an id or slug
-      const requestHasIdOrSlug = tableIds.length === tableNames.length
-
       // Find a matching method to call
-      let method = requestHasIdOrSlug ? REQUEST_MAP_WITH_ID[methodType] : REQUEST_MAP[methodType]
+      let method = _.isUndefined(whereParam) ? REQUEST_MAP[methodType] : REQUEST_MAP_WITH_ID[methodType]
 
       // Return not found error
       if (!method || !_.isFunction(this[method])) return reject(new BuildError(null, NOT_FOUND))
-
-      // Add slugs or IDs to params
-
-      let whereParam = {
-        name: `${tableNames.splice(0, tableNames.length - 1).concat([(_.toNumber(tableIds[0]) == tableIds[0] ? 'id' : 'slug')]).join('_')}`,
-        value: tableIds[0]
-      }
 
       // Set user level for this model
       ctx.userLevel = await this.checkUserLevels(ctx, whereParam)
 
       // Authorize this user's ability to call this method
-      if (!this.methodAuthorized(ctx, method)) return reject(new BuildError(null, UNAUTHORIZED))
+      if (!this.methodAuthorized(ctx, method, preAuth.methods || this.authorizedMethods[ctx.userLevel])) return reject(new BuildError(null, UNAUTHORIZED))
 
       // Validate the fields requested
-      let authorizedFields = this.authorizedFields[ctx.userLevel] || []
+      let authorizedFields = preAuth.fields || this.authorizedFields[ctx.userLevel] || []
 
       if (fields) {
         // If fields is not a string or there is a * anywhere in it, reject

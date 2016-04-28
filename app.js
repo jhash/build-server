@@ -29,6 +29,15 @@ app.context.authenticator = new Authenticator()
 app.context.authorizer = new Authorizer()
 app.context.tableControllerMap = tableControllerMap
 
+
+function constructWhereParam (tableId) {
+  if (_.isUndefined(tableId)) return
+  return {
+    name: _.toNumber(tableId) == tableId ? 'id' : 'slug',
+    value: tableId
+  }
+}
+
 // Prettify response
 app.use(async (ctx, next) => {
   await next()
@@ -96,16 +105,70 @@ app.use(async (ctx) => {
     return index % 2 === 0
   })
 
-  const controllerName = tableNames.join('_')
+  const requestWithId = tableIds.length === tableNames.length
 
-  let tableController = ctx.tableControllerMap[controllerName]
+  const tableName = tableNames.splice(tableNames.length - 1)[0]
+  const tableId = requestWithId ? tableIds.splice(tableIds.length - 1)[0] : undefined
+  const whereParam = constructWhereParam(tableId)
 
-  if (!tableController || !tableController.controller || !_.isFunction(tableController.controller.run)) throw new BuildError(null, NOT_FOUND)
+  console.log(tableName, tableId, whereParam);
+
+  let tableController = _.get(ctx.tableControllerMap, `${tableName}.controller`)
+  if (!tableController || !_.isFunction(tableController.run)) throw new BuildError(null, NOT_FOUND)
+
+  let preAuth = {}
+  for (let index in tableNames) {
+    console.log(tableNames[index]);
+
+    let controller = _.get(ctx.tableControllerMap, `${tableNames[index]}.controller`)
+    if (!controller) break
+
+    const authorizedSubmodelMethods = controller.authorizedSubmodelMethods
+    if (!authorizedSubmodelMethods) break
+
+    console.log('authorizedSubmodelMethods', authorizedSubmodelMethods);
+
+    const authorizedSubmodelFields = controller.authorizedSubmodelFields
+    if (!authorizedSubmodelFields) break
+
+    console.log('authorizedSubmodelFields', authorizedSubmodelFields);
+
+    const authorizedMethodUserLevels = authorizedSubmodelMethods[tableName]
+    if (!authorizedMethodUserLevels) break
+
+    console.log('authorizedMethodUserLevels', authorizedMethodUserLevels);
+
+    const authorizedFieldUserLevels = authorizedSubmodelFields[tableName]
+    if (!authorizedFieldUserLevels) break
+
+    console.log('authorizedFieldUserLevels', authorizedFieldUserLevels);
+
+    const parentWhereParam = constructWhereParam(tableIds[index])
+    if (!parentWhereParam) break
+
+    console.log('parentWhereParam', parentWhereParam);
+
+    const level = await controller.checkUserLevels(ctx, parentWhereParam)
+    if (!level) break
+
+    console.log('level', level);
+
+    preAuth = {
+      methods: authorizedMethodUserLevels[level],
+      fields: authorizedFieldUserLevels[level]
+    }
+  }
+
+  console.log('preAuth', preAuth);
 
   // Set default result
   let result = {}
 
-  result = await tableController.controller.run.call(tableController.controller, ctx, tableIds, tableNames)
+  console.log('result', result);
+
+  result = await tableController.run.call(tableController, ctx, whereParam, preAuth)
+
+  console.log('result', result);
 
   ctx.body = result.body || result
   ctx.status = result.status || OK

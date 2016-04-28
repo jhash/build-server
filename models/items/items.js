@@ -17,10 +17,11 @@ const SLUG = 'slug'
 const ID = 'id'
 
 // User message fields
-const ALL_FIELDS = [DESCRIPTION, NAME, SLUG, ID]
+export const ALL_FIELDS = [DESCRIPTION, NAME, SLUG, ID]
 
 // User message methods
-const ALL_METHODS = [GET, POST, PUT, PATCH, INDEX, DELETE]
+export const ALL_METHODS = [GET, POST, PUT, PATCH, INDEX, DELETE]
+export const VIEW_METHODS = [GET, INDEX]
 
 // Schemas
 

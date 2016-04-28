@@ -6,7 +6,7 @@ import { POST, PUT, PATCH, GET, INDEX, DELETE } from '../../requests/types'
 import { OWNERS, MANAGERS, CONNECTIONS, PRIVATE, PUBLIC } from '../../auth/authorization'
 import { STRING, NUMBER, OBJECT, ARRAY } from '../field_types'
 
-import { TABLE_NAME as ITEMS } from '../items/items'
+import { TABLE_NAME as ITEMS, ALL_METHODS as ITEMS_ALL_METHODS, VIEW_METHODS as ITEMS_VIEW_METHODS, ALL_FIELDS as ITEMS_ALL_FIELDS } from '../items/items'
 
 const MODEL_NAME = 'User'
 const MODEL_NAME_PLURAL = 'Users'
@@ -28,9 +28,6 @@ const PUBLIC_FIELDS = [ID, SLUG]
 // User methods
 const ALL_METHODS = [PUT, GET, POST, PATCH, INDEX, DELETE]
 const VIEW_METHODS = [GET, POST, INDEX]
-
-// User submodel methods
-const ITEMS_VIEW_METHODS = [GET, INDEX]
 
 // Schemas
 
@@ -134,8 +131,18 @@ export default class Users extends Model {
   get authorizedSubmodelMethods () {
     return {
       [ITEMS]: {
-        [OWNERS]: ALL_METHODS,
+        [OWNERS]: ITEMS_ALL_METHODS,
+        [MANAGERS]: ITEMS_ALL_METHODS,
         [CONNECTIONS]: ITEMS_VIEW_METHODS
+      }
+    }
+  }
+  get authorizedSubmodelFields () {
+    return {
+      [ITEMS]: {
+        [OWNERS]: ITEMS_ALL_FIELDS,
+        [MANAGERS]: ITEMS_ALL_FIELDS,
+        [CONNECTIONS]: ITEMS_ALL_FIELDS
       }
     }
   }
