@@ -1,21 +1,23 @@
 import _ from 'lodash'
 
-import Submodel from '../../submodel'
+import Model from '../model'
 
-import { POST, PUT, PATCH, GET, INDEX, DELETE } from '../../../requests/types'
-import { STRING, NUMBER, OBJECT, ARRAY } from '../../field_types'
-import { OWNERS } from '../../../auth/authorization'
+import { POST, PUT, PATCH, GET, INDEX, DELETE } from '../../requests/types'
+import { STRING, NUMBER, OBJECT, ARRAY } from '../field_types'
+import { OWNERS, PUBLIC } from '../../auth/authorization'
 
 const MODEL_NAME = 'Item'
 const MODEL_NAME_PLURAL = 'Items'
-const TABLE_NAME = 'users_items'
+export const TABLE_NAME = 'items'
 
 // User message columns
-const TITLE = 'title'
+const DESCRIPTION = 'description'
+const NAME = 'name'
+const SLUG = 'slug'
 const ID = 'id'
 
 // User message fields
-const ALL_FIELDS = [TITLE, ID]
+const ALL_FIELDS = [DESCRIPTION, NAME, SLUG, ID]
 
 // User message methods
 const ALL_METHODS = [GET, POST, PUT, PATCH, INDEX, DELETE]
@@ -26,9 +28,11 @@ const ALL_METHODS = [GET, POST, PUT, PATCH, INDEX, DELETE]
 const ITEMS_POST_PUT_PATCH_REQUEST_SCHEMA = {
   type: OBJECT,
   properties: {
-    [TITLE]: { type: STRING }
+    [DESCRIPTION]: { type: STRING },
+    [NAME]: { type: STRING },
+    [SLUG]: { type: STRING }
   },
-  required: [TITLE],
+  required: [NAME, SLUG],
   additionalProperties: false
 }
 
@@ -36,7 +40,9 @@ const ITEMS_POST_PUT_PATCH_REQUEST_SCHEMA = {
 const ITEMS_FULL_RESPONSE_SCHEMA = {
   type: OBJECT,
   properties: {
-    [TITLE]: { type: STRING },
+    [DESCRIPTION]: { type: STRING },
+    [NAME]: { type: STRING },
+    [SLUG]: { type: STRING },
     [ID]: { type: NUMBER }
   },
   required: ALL_FIELDS,
@@ -48,7 +54,7 @@ const ITEMS_FULL_RESPONSE_LIST_SCHEMA = {
   items: [ITEMS_FULL_RESPONSE_SCHEMA]
 }
 
-export default class Items extends Submodel {
+export default class Items extends Model {
   get modelName () {
     return MODEL_NAME
   }
@@ -73,16 +79,18 @@ export default class Items extends Submodel {
   }
   get authorizedFields () {
     return {
-      [OWNERS]: ALL_FIELDS
+      [OWNERS]: ALL_FIELDS,
+      [PUBLIC]: ALL_FIELDS
+    }
+  }
+  get authorizedMethods () {
+    return {
+      [OWNERS]: ALL_METHODS,
+      [PUBLIC]: ALL_METHODS
     }
   }
   get allFields () {
     return ALL_FIELDS
-  }
-  get authorizedMethods () {
-    return {
-      [OWNERS]: ALL_METHODS
-    }
   }
   get possibleUserLevels () {
     return [OWNERS]

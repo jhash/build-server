@@ -6,6 +6,8 @@ import { POST, PUT, PATCH, GET, INDEX, DELETE } from '../../requests/types'
 import { OWNERS, MANAGERS, CONNECTIONS, PRIVATE, PUBLIC } from '../../auth/authorization'
 import { STRING, NUMBER, OBJECT, ARRAY } from '../field_types'
 
+import { TABLE_NAME as ITEMS } from '../items/items'
+
 const MODEL_NAME = 'User'
 const MODEL_NAME_PLURAL = 'Users'
 const TABLE_NAME = 'users'
@@ -26,6 +28,9 @@ const PUBLIC_FIELDS = [ID, SLUG]
 // User methods
 const ALL_METHODS = [PUT, GET, POST, PATCH, INDEX, DELETE]
 const VIEW_METHODS = [GET, POST, INDEX]
+
+// User submodel methods
+const ITEMS_VIEW_METHODS = [GET, INDEX]
 
 // Schemas
 
@@ -111,9 +116,6 @@ export default class Users extends Model {
       [PUBLIC]: PUBLIC_FIELDS
     }
   }
-  get allFields () {
-    return ALL_FIELDS
-  }
   get authorizedMethods () {
     return {
       [OWNERS]: ALL_METHODS,
@@ -123,7 +125,18 @@ export default class Users extends Model {
       [PUBLIC]: VIEW_METHODS
     }
   }
+  get allFields () {
+    return ALL_FIELDS
+  }
   get possibleUserLevels () {
     return [OWNERS, MANAGERS, CONNECTIONS]
+  }
+  get authorizedSubmodelMethods () {
+    return {
+      [ITEMS]: {
+        [OWNERS]: ALL_METHODS,
+        [CONNECTIONS]: ITEMS_VIEW_METHODS
+      }
+    }
   }
 }
